@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <script>
+    // Request audio permission saat halaman pertama kali dibuka
+    document.addEventListener('click', function initAudio() {
+        // Buat audio dummy untuk unlock audio
+        var dummy = new Audio();
+        dummy.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+        dummy.play().then(function() {
+            dummy.pause();
+            dummy = null;
+        }).catch(function() {});
+        document.removeEventListener('click', initAudio);
+    }, { once: true });
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KOTOBA - Belajar Bahasa Jepang</title>
