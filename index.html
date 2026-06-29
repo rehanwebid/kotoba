@@ -250,11 +250,18 @@
     </div>
 
     <script>
+        // ====== ANTI BOCOR ======
+        (function(){
+            document.addEventListener('contextmenu', function(e){ e.preventDefault(); return false; });
+            document.addEventListener('keydown', function(e){
+                if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&e.key==='I')||(e.ctrlKey&&e.shiftKey&&e.key==='J')||(e.ctrlKey&&e.key==='U')||(e.ctrlKey&&e.shiftKey&&e.key==='C')){ e.preventDefault(); return false; }
+            });
+        })();
 
         // ====== KONFIGURASI PREMIUM ======
         var PREMIUM_CONFIG = [
-            { id: "KTB-15875884", waktu: "01012027" },
-            { id: "KTB-15263331", waktu: "01012027" }
+            { id: "KTB-15875884", waktu: "01072006" },
+            { id: "KTB-15263331", waktu: "17129999" }
         ];
 
         function checkPremiumByConfig(userId) {
@@ -267,6 +274,19 @@
             }
             return false;
         }
+
+        // ====== REFRESH PREMIUM SAAT HALAMAN VISIBLE ======
+        document.addEventListener('visibilitychange', function(){
+            if(!document.hidden){
+                var u=getUser();
+                if(u){
+                    updatePremiumUI(checkPremiumByConfig(u.id));
+                    updateKamus();
+                    updateLevelButton();
+                    updateLevelPanel();
+                }
+            }
+        });
 
         var allVocabData = [
             { level:1, category:"Mengenal orang", words:[
@@ -384,59 +404,59 @@
             vg.innerHTML=h; pb.style.display=ip?'none':'flex';
         }
 
-        // ====== SHARE (ANTI KEYBOARD) ======
+        // ====== SUARA DENGAN FALLBACK ======
+        var audioElement=null;
+        function speakWord(){
+            var text=document.getElementById('questionJapanese').textContent;
+            // Coba SpeechSynthesis dulu
+            if('speechSynthesis' in window){
+                try{
+                    window.speechSynthesis.cancel();
+                    var u=new SpeechSynthesisUtterance(text);
+                    u.lang='ja-JP'; u.rate=0.8; u.pitch=1;
+                    u.onerror=function(){ speakFallback(text); };
+                    window.speechSynthesis.speak(u);
+                    return;
+                }catch(e){}
+            }
+            // Fallback ke Google TTS
+            speakFallback(text);
+        }
+
+        function speakFallback(text){
+            if(audioElement){ audioElement.pause(); audioElement=null; }
+            var url='https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q='+encodeURIComponent(text);
+            audioElement=new Audio(url);
+            audioElement.play().catch(function(){
+                audioElement=null;
+            });
+        }
+
+        // ====== SHARE ======
         var copyTimeout=null;
         function copyShareLink(event){
             if(event){ event.preventDefault(); }
             if(document.activeElement){ document.activeElement.blur(); }
-
             var urlEl=document.getElementById('shareUrl');
             var originalUrl='https://appsgeyser.io/19947687/KOTOBA';
-
             if(navigator.clipboard && navigator.clipboard.writeText){
-                navigator.clipboard.writeText(originalUrl).then(function(){
-                    showCopiedFeedback(urlEl, originalUrl);
-                }).catch(function(){
-                    fallbackCopy(originalUrl, urlEl);
-                });
-            } else {
-                fallbackCopy(originalUrl, urlEl);
-            }
+                navigator.clipboard.writeText(originalUrl).then(function(){ showCopiedFeedback(urlEl, originalUrl); }).catch(function(){ fallbackCopy(originalUrl, urlEl); });
+            } else { fallbackCopy(originalUrl, urlEl); }
             return false;
         }
-
         function fallbackCopy(text, urlEl){
-            var textarea=document.createElement('textarea');
-            textarea.value=text;
-            textarea.style.position='fixed';
-            textarea.style.left='-9999px';
-            textarea.style.top='-9999px';
-            textarea.style.opacity='0';
-            textarea.setAttribute('readonly','readonly');
-            document.body.appendChild(textarea);
-            textarea.focus();
-            textarea.select();
-            try{
-                document.execCommand('copy');
-                showCopiedFeedback(urlEl, text);
-            }catch(e){
-                urlEl.textContent='Gagal menyalin';
-                urlEl.classList.add('copied');
-                if(copyTimeout)clearTimeout(copyTimeout);
-                copyTimeout=setTimeout(function(){ urlEl.textContent=text; urlEl.classList.remove('copied'); },2000);
-            }
-            document.body.removeChild(textarea);
+            var ta=document.createElement('textarea');
+            ta.value=text; ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.top='-9999px'; ta.style.opacity='0'; ta.setAttribute('readonly','readonly');
+            document.body.appendChild(ta); ta.focus(); ta.select();
+            try{ document.execCommand('copy'); showCopiedFeedback(urlEl, text); }
+            catch(e){ urlEl.textContent='Gagal menyalin'; urlEl.classList.add('copied'); if(copyTimeout)clearTimeout(copyTimeout); copyTimeout=setTimeout(function(){ urlEl.textContent=text; urlEl.classList.remove('copied'); },2000); }
+            document.body.removeChild(ta);
             if(document.activeElement){ document.activeElement.blur(); }
         }
-
         function showCopiedFeedback(urlEl, originalUrl){
-            urlEl.textContent='Tautan sudah tersalin';
-            urlEl.classList.add('copied');
+            urlEl.textContent='Tautan sudah tersalin'; urlEl.classList.add('copied');
             if(copyTimeout)clearTimeout(copyTimeout);
-            copyTimeout=setTimeout(function(){
-                urlEl.textContent=originalUrl;
-                urlEl.classList.remove('copied');
-            },2000);
+            copyTimeout=setTimeout(function(){ urlEl.textContent=originalUrl; urlEl.classList.remove('copied'); },2000);
         }
 
         var mainContainer=document.getElementById('mainContainer');
