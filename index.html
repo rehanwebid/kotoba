@@ -384,41 +384,6 @@
             vg.innerHTML=h; pb.style.display=ip?'none':'flex';
         }
 
-        function speakWord() {
-    var text = document.getElementById('questionJapanese').textContent;
-    
-    // Method 1: Speech Synthesis (untuk website)
-    if ('speechSynthesis' in window) {
-        try {
-            window.speechSynthesis.cancel();
-            var utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ja-JP';
-            utterance.rate = 0.8;
-            utterance.pitch = 1;
-            
-            // Cek apakah suara Jepang tersedia
-            var voices = window.speechSynthesis.getVoices();
-            var japaneseVoice = voices.find(function(v) { return v.lang.indexOf('ja') !== -1; });
-            if (japaneseVoice) utterance.voice = japaneseVoice;
-            
-            window.speechSynthesis.speak(utterance);
-            return;
-        } catch(e) {
-            console.log('Speech synthesis gagal, pakai fallback');
-        }
-    }
-    
-    // Method 2: Google Translate TTS (fallback untuk APK)
-    var audio = new Audio();
-    audio.src = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=' + encodeURIComponent(text);
-    audio.play().catch(function() {
-        // Kalau Google gagal, coba voice RSS
-        var audio2 = new Audio();
-        audio2.src = 'https://api.voicerss.org/?key=YOUR_API_KEY&hl=ja-jp&src=' + encodeURIComponent(text);
-        audio2.play();
-    });
-        }
-        
         // ====== SHARE (ANTI KEYBOARD) ======
         var copyTimeout=null;
         function copyShareLink(event){
