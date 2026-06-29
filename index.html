@@ -261,7 +261,7 @@
         // ====== KONFIGURASI PREMIUM ======
         var PREMIUM_CONFIG = [
             { id: "KTB-12345678", waktu: "02122008" },
-            { id: "", waktu: "" }
+            { id: "KTB-15263331", waktu: "17129999" }
         ];
 
         function checkPremiumByConfig(userId) {
@@ -390,8 +390,42 @@
             for(var i=0;i<allVocabData.length;i++){ var cat=allVocabData[i]; h+='<div class="category-divider" style="width:100%;"><div class="category-line"></div><span class="category-text">'+cat.category+'</span><div class="category-line"></div></div>'; for(var j=0;j<cat.words.length;j++){ var w=cat.words[j]; var lk=false; if(!ip){ if(i+1>ml)lk=true; else if(i+1>=2&&!isQuestionCompleted(i+1,j))lk=true; } h+='<div class="vocab-card '+(lk?'locked':'')+'"><p class="vocab-japanese">'+w.jp+'</p><p class="vocab-romaji">'+w.romaji+'</p><div class="vocab-divider"></div><p class="vocab-meaning">'+w.arti+'</p></div>'; } }
             vg.innerHTML=h; pb.style.display=ip?'none':'flex';
         }
-        function speakWord(){ var t=document.getElementById('questionJapanese').textContent; if('speechSynthesis' in window){ window.speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang='ja-JP';u.rate=0.8;u.pitch=1; window.speechSynthesis.speak(u); } }
 
+        function speakWord() {
+    var text = document.getElementById('questionJapanese').textContent;
+    
+    // Method 1: Speech Synthesis (untuk website)
+    if ('speechSynthesis' in window) {
+        try {
+            window.speechSynthesis.cancel();
+            var utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ja-JP';
+            utterance.rate = 0.8;
+            utterance.pitch = 1;
+            
+            // Cek apakah suara Jepang tersedia
+            var voices = window.speechSynthesis.getVoices();
+            var japaneseVoice = voices.find(function(v) { return v.lang.indexOf('ja') !== -1; });
+            if (japaneseVoice) utterance.voice = japaneseVoice;
+            
+            window.speechSynthesis.speak(utterance);
+            return;
+        } catch(e) {
+            console.log('Speech synthesis gagal, pakai fallback');
+        }
+    }
+    
+    // Method 2: Google Translate TTS (fallback untuk APK)
+    var audio = new Audio();
+    audio.src = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=' + encodeURIComponent(text);
+    audio.play().catch(function() {
+        // Kalau Google gagal, coba voice RSS
+        var audio2 = new Audio();
+        audio2.src = 'https://api.voicerss.org/?key=YOUR_API_KEY&hl=ja-jp&src=' + encodeURIComponent(text);
+        audio2.play();
+    });
+        }
+        
         // ====== SHARE (ANTI KEYBOARD) ======
         var copyTimeout=null;
         function copyShareLink(event){
