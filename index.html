@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KOTOBA - Belajar Bahasa Jepang</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1; --primary-dark: #4f46e5; --primary-light: #eef2ff; --accent: #f59e0b;
+            --bg: #f8fafc; --surface: #ffffff; --surface-hover: #f1f5f9; --text: #1e293b;
+            --text-secondary: #64748b; --text-muted: #94a3b8; --border: #e2e8f0; --border-light: #f1f5f9;
+            --success: #10b981; --success-light: #d1fae5; --error: #ef4444;
+            --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05); --shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+            --radius-sm: 8px; --radius: 12px; --radius-lg: 16px; --radius-xl: 20px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+        body { background:var(--bg); width:100vw; height:100dvh; overflow:hidden; position:relative; font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; -webkit-font-smoothing:antialiased; }
+        button,div,span,p,h1,h2,h3,input { -webkit-tap-highlight-color:transparent; outline:none; font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; }
+        button:focus,div:focus,span:focus,p:focus,h1:focus,h2:focus,h3:focus,input:focus { outline:none; }
+
+        .register-container { position:absolute; top:0; left:0; width:100vw; height:100dvh; z-index:20; display:flex; justify-content:center; align-items:center; background:linear-gradient(180deg,#eef2ff 0%,#f8fafc 50%,#f1f5f9 100%); transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.5s cubic-bezier(0.25,0.46,0.45,0.94); }
+        .register-container.hidden { transform:scale(0.9); opacity:0; pointer-events:none; }
+        .register-box { width:85vw; max-width:340px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); padding:32px 24px; display:flex; flex-direction:column; align-items:center; box-shadow:var(--shadow-lg); position:relative; z-index:1; }
+        .register-logo { width:56px; height:56px; background:var(--primary); border-radius:16px; display:flex; justify-content:center; align-items:center; margin-bottom:16px; font-size:24px; color:white; box-shadow:0 4px 12px rgba(99,102,241,0.3); }
+        .register-title { color:var(--text); font-family:'Noto Sans JP',sans-serif; font-size:22px; font-weight:700; margin-bottom:4px; letter-spacing:0.02em; }
+        .register-subtitle { color:var(--text-secondary); font-size:13px; font-weight:400; margin-bottom:24px; text-align:center; line-height:1.5; }
+        .register-input { width:100%; height:48px; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--radius); color:var(--text); font-size:15px; font-weight:500; padding:0 16px; margin-bottom:16px; text-align:center; -webkit-user-select:text; user-select:text; transition:border-color 0.2s,box-shadow 0.2s; }
+        .register-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(99,102,241,0.1); }
+        .register-input::placeholder { color:var(--text-muted); font-weight:400; }
+        .register-button { width:100%; height:48px; background:var(--primary); border:none; border-radius:var(--radius); color:white; font-size:15px; font-weight:600; cursor:pointer; transition:background 0.2s,transform 0.1s; box-shadow:0 2px 8px rgba(99,102,241,0.25); }
+        .register-button:active { background:var(--primary-dark); transform:scale(0.98); }
+        .register-error { color:var(--error); font-size:12px; font-weight:500; margin-top:10px; display:none; }
+
+        .main-container { width:100vw; height:100dvh; display:flex; flex-direction:column; align-items:center; position:relative; z-index:1; background:var(--bg); }
+        .main-container.hidden-behind { opacity:0; pointer-events:none; }
+        .app-header { position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:flex-start; padding:16px 20px; z-index:2; }
+        .header-brand { display:flex; align-items:center; gap:8px; }
+        .header-logo { width:32px; height:32px; background:var(--primary); border-radius:10px; display:flex; justify-content:center; align-items:center; color:white; font-size:16px; font-weight:700; }
+        .header-title { color:var(--text); font-family:'Noto Sans JP',sans-serif; font-size:16px; font-weight:700; letter-spacing:0.03em; }
+        .user-info { text-align:right; line-height:1.5; }
+        .user-name-display { font-size:13px; font-weight:600; color:var(--text); display:flex; align-items:center; justify-content:flex-end; gap:5px; }
+        .premium-crown-icon { color:var(--accent); font-size:12px; animation:crownGlow 2s ease-in-out infinite; }
+        @keyframes crownGlow { 0%,100%{filter:drop-shadow(0 0 2px rgba(245,158,11,0.4));} 50%{filter:drop-shadow(0 0 6px rgba(245,158,11,0.7));} }
+        .user-id-display { font-size:10px; font-weight:500; color:var(--text-muted); letter-spacing:0.02em; }
+
+        .bottom-area { position:absolute; bottom:20px; left:16px; right:16px; display:flex; align-items:flex-end; justify-content:space-between; z-index:2; gap:12px; }
+        .bottom-left { display:flex; flex-direction:column; gap:6px; flex:1; min-width:0; }
+        .share-label { font-size:10px; color:var(--text-muted); font-weight:500; }
+        .share-box { width:100%; height:36px; background:var(--surface); border:1.5px solid var(--primary); border-radius:5px; display:flex; align-items:center; padding:0 10px; gap:8px; cursor:pointer; transition:all 0.2s; overflow:hidden; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+        .share-box:active { background:var(--primary-light); }
+        .share-box i { color:var(--primary); font-size:13px; flex-shrink:0; }
+        .share-url { color:var(--text-muted); font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; pointer-events:none; }
+        .share-url.copied { color:var(--primary); font-weight:600; }
+        .bottom-right { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+        .btn-lv { width:44px; height:44px; background:var(--primary); border:none; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; color:white; font-size:12px; font-weight:700; box-shadow:0 4px 12px rgba(99,102,241,0.35); transition:transform 0.2s,box-shadow 0.2s; letter-spacing:-0.5px; }
+        .btn-lv:active { transform:scale(0.95); background:var(--primary-dark); }
+        .btn-book { width:44px; height:44px; background:var(--primary); border:none; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; color:white; font-size:18px; box-shadow:0 4px 12px rgba(99,102,241,0.35); transition:transform 0.2s,box-shadow 0.2s; }
+        .btn-book:active { transform:scale(0.95); background:var(--primary-dark); }
+
+        .session-wrapper { width:100%; display:flex; flex-direction:column; align-items:center; padding-top:14vh; transform:scale(0.9); opacity:0; transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.5s cubic-bezier(0.25,0.46,0.45,0.94); }
+        .session-wrapper.zoom-in { transform:scale(1); opacity:1; }
+        .session-wrapper.zoom-out { transform:scale(0.9); opacity:0; }
+        .question-card { width:82vw; max-width:360px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px 20px 20px; display:flex; flex-direction:column; justify-content:center; align-items:center; box-shadow:var(--shadow-md); margin-bottom:28px; position:relative; }
+        .btn-speaker { position:absolute; top:10px; right:12px; width:32px; height:32px; background:var(--primary-light); border:none; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; color:var(--primary); font-size:14px; transition:all 0.2s; }
+        .btn-speaker:active { background:var(--primary); color:white; transform:scale(0.95); }
+        .question-label { color:var(--text-muted); font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px; }
+        .main-text { color:var(--primary); font-family:'Noto Sans JP',sans-serif; font-size:48px; font-weight:700; line-height:1.2; }
+        .romaji-text { color:var(--text); font-family:'Inter',sans-serif; font-size:15px; font-weight:500; margin-top:8px; letter-spacing:0.02em; }
+        .answer-container { width:82vw; max-width:360px; display:flex; flex-direction:column; gap:10px; }
+        .answer-card { width:100%; height:48px; background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius); display:flex; align-items:center; padding:0 14px; cursor:pointer; transition:all 0.2s; position:relative; box-shadow:var(--shadow-sm); }
+        .answer-card:active { background:var(--surface-hover); transform:scale(0.99); }
+        .answer-card.blurred { opacity:0.4; pointer-events:none; }
+        .answer-card.pulse { animation:answerPulse 0.6s ease-in-out 5; border-color:var(--primary); }
+        @keyframes answerPulse { 0%,100%{border-color:var(--primary);box-shadow:0 0 0 0 rgba(99,102,241,0.3);} 50%{border-color:var(--primary);box-shadow:0 0 0 8px rgba(99,102,241,0);} }
+        .answer-letter { width:30px; height:30px; background:var(--primary); border:none; border-radius:var(--radius-sm); display:flex; justify-content:center; align-items:center; color:white; font-size:13px; font-weight:700; flex-shrink:0; margin-right:12px; }
+        .answer-letter.locked-icon { background:var(--border); color:var(--text-muted); font-size:11px; }
+        .answer-label { color:var(--text); font-size:15px; font-weight:500; position:absolute; left:50%; transform:translateX(-50%); }
+        .progress-bar { width:82vw; max-width:360px; height:4px; background:var(--border); border-radius:2px; margin-bottom:16px; overflow:hidden; }
+        .progress-fill { height:100%; background:var(--primary); border-radius:2px; transition:width 0.3s ease; }
+
+        .slide-panel-right { position:absolute; top:0; right:-100vw; width:100vw; height:100dvh; background:var(--bg); transition:right 0.45s cubic-bezier(0.25,0.46,0.45,0.94); z-index:10; padding:20px 16px 100px; display:flex; flex-direction:column; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+        .slide-panel-right.open { right:0; }
+        .slide-panel-left { position:absolute; top:0; left:-100vw; width:100vw; height:100dvh; background:var(--bg); transition:left 0.45s cubic-bezier(0.25,0.46,0.45,0.94); z-index:10; padding:20px 16px; display:flex; flex-direction:column; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+        .slide-panel-left.open { left:0; }
+        .panel-back { display:flex; align-items:center; gap:8px; color:var(--primary); font-size:14px; font-weight:600; cursor:pointer; margin-bottom:24px; width:fit-content; padding:6px 0; }
+        .panel-back i { font-size:14px; }
+        .panel-title { font-family:'Noto Sans JP',sans-serif; font-size:20px; font-weight:700; color:var(--text); margin-bottom:4px; }
+        .panel-desc { font-size:12px; color:var(--text-secondary); margin-bottom:20px; }
+
+        .vocab-grid { display:flex; flex-wrap:wrap; gap:10px; }
+        .vocab-card { width:calc(50% - 5px); background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 12px; display:flex; flex-direction:column; align-items:center; transition:all 0.3s; box-shadow:var(--shadow-sm); }
+        .vocab-card.locked { opacity:0.4; filter:blur(3px); pointer-events:none; }
+        .vocab-card.unlocked { opacity:1; filter:blur(0); }
+        .vocab-japanese { color:var(--primary); font-family:'Noto Sans JP',sans-serif; font-size:22px; font-weight:700; margin-bottom:4px; }
+        .vocab-romaji { color:var(--text); font-size:11px; font-weight:500; margin-bottom:10px; }
+        .vocab-divider { width:100%; height:1px; background:var(--border-light); margin-bottom:10px; }
+        .vocab-meaning { color:var(--primary); font-size:14px; font-weight:600; }
+        .category-divider { width:100%; display:flex; align-items:center; gap:12px; margin:16px 0 12px; }
+        .category-line { flex:1; height:1px; background:var(--border); }
+        .category-text { color:var(--text-muted); font-size:10px; font-weight:600; white-space:nowrap; letter-spacing:0.03em; text-transform:uppercase; }
+
+        .premium-section { width:100%; margin-top:16px; }
+        .premium-divider-wrapper { width:100%; display:flex; align-items:center; gap:12px; margin:12px 0; }
+        .premium-divider-line { flex:1; height:1px; background:var(--border); }
+        .premium-divider-text { color:var(--text-muted); font-size:11px; font-weight:600; white-space:nowrap; letter-spacing:0.03em; }
+        .premium-upgrade-btn { width:100%; height:48px; background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius); color:var(--text); font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; box-shadow:var(--shadow-sm); }
+        .premium-upgrade-btn:active { background:var(--surface-hover); border-color:var(--primary); }
+        .premium-upgrade-btn i { color:var(--accent); font-size:14px; }
+
+        .level-list { display:flex; flex-direction:column; align-items:center; gap:0; width:100%; }
+        .level-row { display:flex; align-items:center; gap:12px; width:100%; max-width:340px; padding:14px 0; }
+        .level-btn { width:48px; height:48px; border-radius:50%; border:none; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .level-btn.completed { background:var(--success-light); color:#065f46; }
+        .level-btn.current { background:var(--primary); color:white; box-shadow:0 4px 12px rgba(99,102,241,0.35); }
+        .level-btn.locked { background:var(--border); color:var(--text-muted); pointer-events:none; }
+        .level-info { flex:1; }
+        .level-name { font-size:17px; font-weight:700; color:var(--text); }
+        .level-action { height:32px; padding:0 14px; border-radius:20px; border:none; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s; flex-shrink:0; }
+        .level-action.review { background:var(--success-light); color:#065f46; }
+        .level-action.continue { background:var(--primary); color:white; box-shadow:0 2px 8px rgba(99,102,241,0.25); }
+        .level-action.wait { background:var(--border); color:var(--text-muted); pointer-events:none; }
+        .level-connector { width:2px; height:22px; background:var(--border); margin-left:24px; border-radius:1px; align-self:flex-start; }
+
+        .popup-level-overlay { position:absolute; top:0; left:0; width:100vw; height:100dvh; background:rgba(15,23,42,0.7); backdrop-filter:blur(4px); z-index:26; display:flex; justify-content:center; align-items:center; opacity:0; pointer-events:none; transition:opacity 0.35s; }
+        .popup-level-overlay.show { opacity:1; pointer-events:auto; }
+        .popup-level-card { width:85vw; max-width:340px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); padding:28px 20px 20px; display:flex; flex-direction:column; align-items:center; text-align:center; box-shadow:var(--shadow-lg); }
+        .popup-level-icon { font-size:40px; color:var(--primary); margin-bottom:12px; }
+        .popup-level-headline { color:var(--text); font-size:18px; font-weight:700; margin-bottom:4px; }
+        .popup-level-desc { color:var(--text-secondary); font-size:13px; margin-bottom:20px; }
+        .popup-level-buttons { width:100%; display:flex; gap:10px; }
+        .btn-repeat { flex:1; height:42px; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--radius); color:var(--text); font-size:14px; font-weight:600; cursor:pointer; }
+        .btn-next-level { flex:1; height:42px; background:var(--primary); border:none; border-radius:var(--radius); color:white; font-size:14px; font-weight:600; cursor:pointer; }
+
+        .popup-overlay { position:absolute; top:0; left:0; width:100vw; height:100dvh; background:rgba(15,23,42,0.7); backdrop-filter:blur(4px); z-index:25; display:flex; justify-content:center; align-items:center; opacity:0; pointer-events:none; transition:opacity 0.35s; }
+        .popup-overlay.show { opacity:1; pointer-events:auto; }
+        .popup-card { width:88vw; max-width:380px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); padding:32px 20px 24px; display:flex; flex-direction:column; align-items:center; text-align:center; box-shadow:var(--shadow-lg); position:relative; }
+        .popup-badge { position:absolute; top:-20px; width:44px; height:44px; background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%); border-radius:50%; display:flex; justify-content:center; align-items:center; color:white; font-size:18px; box-shadow:0 4px 12px rgba(245,158,11,0.4); }
+        .popup-headline { color:var(--text); font-family:'Noto Sans JP',sans-serif; font-size:20px; font-weight:700; margin-bottom:4px; margin-top:10px; }
+        .popup-description { color:var(--text-secondary); font-size:13px; margin-bottom:24px; line-height:1.5; }
+        .pricing-list { width:100%; display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+        .pricing-item { width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--radius); padding:14px 16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:all 0.2s; }
+        .pricing-item.recommended { border-color:var(--accent); background:#fffbeb; }
+        .pricing-label { color:var(--text); font-size:13px; font-weight:500; }
+        .pricing-value { color:var(--text); font-size:15px; font-weight:700; }
+        .pricing-badge { font-size:9px; background:var(--accent); color:white; padding:2px 8px; border-radius:20px; font-weight:600; margin-left:6px; }
+        .notice-box { width:100%; background:#f0f9ff; border:1px solid #bae6fd; border-radius:var(--radius-sm); padding:12px; margin-bottom:20px; text-align:left; }
+        .notice-title { color:#0369a1; font-size:10px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:4px; text-transform:uppercase; letter-spacing:0.03em; }
+        .notice-text { color:#0c4a6e; font-size:10px; line-height:1.5; display:flex; align-items:flex-start; gap:4px; margin-bottom:2px; opacity:0.8; }
+        .btn-premium-cta { width:100%; height:48px; background:var(--primary); border:none; border-radius:var(--radius); color:white; font-size:15px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:12px; transition:all 0.2s; box-shadow:0 2px 8px rgba(99,102,241,0.25); }
+        .btn-close-popup { color:var(--text-muted); font-size:12px; font-weight:500; cursor:pointer; background:none; border:none; }
+    </style>
+</head>
+<body>
+    <div class="register-container" id="registerContainer">
+        <div class="register-box">
+            <div class="register-logo"><i class="fa-solid fa-language"></i></div>
+            <h2 class="register-title">KOTOBA</h2>
+            <p class="register-subtitle">Belajar kosakata bahasa Jepang dengan cara yang menyenangkan</p>
+            <input type="text" class="register-input" id="nameInput" placeholder="Masukkan nama kamu" maxlength="20" autocomplete="off">
+            <button class="register-button" onclick="registerUser()">Mulai Belajar</button>
+            <p class="register-error" id="registerError">Nama tidak boleh kosong</p>
+        </div>
+    </div>
+
+    <div class="popup-level-overlay" id="popupLevelOverlay">
+        <div class="popup-level-card">
+            <div class="popup-level-icon"><i class="fa-solid fa-trophy"></i></div>
+            <h3 class="popup-level-headline">Selamat!</h3>
+            <p class="popup-level-desc" id="popupLevelDesc">Kamu lolos ke level selanjutnya!</p>
+            <div class="popup-level-buttons"><button class="btn-repeat" onclick="repeatLevel()">Ulangi</button><button class="btn-next-level" onclick="nextLevel()">Lanjutkan</button></div>
+        </div>
+    </div>
+
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-card">
+            <div class="popup-badge"><i class="fa-solid fa-crown"></i></div>
+            <h3 class="popup-headline">Upgrade ke Premium</h3>
+            <p class="popup-description">Buka semua kosakata dan fitur eksklusif</p>
+            <div class="pricing-list">
+                <div class="pricing-item" onclick="closePopup()"><span class="pricing-label">Mingguan</span><span class="pricing-value">Rp 2.000</span></div>
+                <div class="pricing-item recommended"><span class="pricing-label">Bulanan <span class="pricing-badge">POPULER</span></span><span class="pricing-value">Rp 5.000</span></div>
+                <div class="pricing-item" onclick="closePopup()"><span class="pricing-label">Tahunan</span><span class="pricing-value">Rp 10.000</span></div>
+            </div>
+            <div class="notice-box">
+                <div class="notice-title"><i class="fa-solid fa-circle-info"></i> Informasi Penting</div>
+                <p class="notice-text"><i class="fa-solid fa-mobile-screen-button"></i> Aplikasi hanya dapat digunakan di perangkat yang sama</p>
+                <p class="notice-text"><i class="fa-solid fa-globe"></i> Website terikat dengan browser dan perangkat</p>
+                <p class="notice-text"><i class="fa-solid fa-shield-halved"></i> Data tersimpan aman secara lokal</p>
+            </div>
+            <button class="btn-premium-cta" onclick="goToWhatsApp()"><i class="fa-solid fa-crown"></i>Dapatkan Premium Sekarang</button>
+            <button class="btn-close-popup" onclick="closePopup()">Kembali</button>
+        </div>
+    </div>
+
+    <div class="main-container hidden-behind" id="mainContainer">
+        <div class="app-header">
+            <div class="header-brand"><div class="header-logo"><i class="fa-solid fa-language"></i></div><span class="header-title">KOTOBA</span></div>
+            <div class="user-info" id="userInfo"><div class="user-name-display" id="userNameDisplay"></div><div class="user-id-display" id="userIdDisplay"></div></div>
+        </div>
+        <div class="session-wrapper" id="sessionWrapper">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+            <div class="question-card">
+                <button class="btn-speaker" onclick="speakWord()"><i class="fa-solid fa-volume-high"></i></button>
+                <p class="question-label" id="questionLabel">Pilih Arti yang Tepat</p>
+                <p class="main-text" id="questionJapanese">わたし</p>
+                <p class="romaji-text" id="questionRomaji">watashi</p>
+            </div>
+            <div class="answer-container" id="answerContainer">
+                <div class="answer-card" onclick="checkAnswer(0)"><div class="answer-letter" id="letterA">A</div><span class="answer-label" id="answerA">Anda</span></div>
+                <div class="answer-card" onclick="checkAnswer(1)"><div class="answer-letter" id="letterB">B</div><span class="answer-label" id="answerB">Saya</span></div>
+                <div class="answer-card" onclick="checkAnswer(2)"><div class="answer-letter" id="letterC">C</div><span class="answer-label" id="answerC">Mereka</span></div>
+                <div class="answer-card" onclick="checkAnswer(3)"><div class="answer-letter" id="letterD">D</div><span class="answer-label" id="answerD">Kami</span></div>
+            </div>
+        </div>
+        <div class="bottom-area">
+            <div class="bottom-left">
+                <span class="share-label">Download/Bagikan Apk</span>
+                <div class="share-box" onclick="copyShareLink(event)" tabindex="-1">
+                    <i class="fa-solid fa-copy"></i>
+                    <span class="share-url" id="shareUrl">https://akiyama1502.github.io/kotoba/</span>
+                </div>
+            </div>
+            <div class="bottom-right">
+                <button class="btn-lv" id="btnLv" onclick="openLevelPanel()">Lv.1</button>
+                <button class="btn-book" id="btnBook" onclick="openPanel()"><i class="fa-solid fa-book"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-panel-right" id="slidePanel">
+        <div class="panel-back" onclick="closePanel()"><i class="fa-solid fa-chevron-left"></i><span>Kembali</span></div>
+        <h2 class="panel-title">Kamus Kosakata</h2><p class="panel-desc">Kumpulan kosakata bahasa Jepang</p>
+        <div class="vocab-grid" id="vocabGrid"></div>
+        <div class="premium-section">
+            <div class="premium-divider-wrapper"><div class="premium-divider-line"></div><span class="premium-divider-text">PREMIUM</span><div class="premium-divider-line"></div></div>
+            <button class="premium-upgrade-btn" id="premiumUpgradeBtn" onclick="showPopup()"><i class="fa-solid fa-crown"></i> Upgrade ke Premium</button>
+        </div>
+    </div>
+
+    <div class="slide-panel-left" id="levelPanel">
+        <div class="panel-back" onclick="closeLevelPanel()"><i class="fa-solid fa-chevron-right"></i><span>Kembali</span></div>
+        <h2 class="panel-title">LEVEL</h2><p class="panel-desc">Tahapan level pembelajaran</p>
+        <div class="level-list" id="levelList"></div>
+    </div>
+
+    <script>
+        // ====== ANTI BOCOR ======
+        (function(){
+            document.addEventListener('contextmenu', function(e){ e.preventDefault(); return false; });
+            document.addEventListener('keydown', function(e){
+                if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&e.key==='I')||(e.ctrlKey&&e.shiftKey&&e.key==='J')||(e.ctrlKey&&e.key==='U')||(e.ctrlKey&&e.shiftKey&&e.key==='C')){ e.preventDefault(); return false; }
+            });
+        })();
+
+        // ====== KONFIGURASI PREMIUM ======
+        var PREMIUM_CONFIG = [
+            { id: "KTB-12345678", waktu: "02122008" },
+            { id: "", waktu: "" }
+        ];
+
+        function checkPremiumByConfig(userId) {
+            if (!userId) return false;
+            var now = new Date();
+            var today = String(now.getDate()).padStart(2,'0') + String(now.getMonth()+1).padStart(2,'0') + now.getFullYear();
+            var todayNum = Number(today);
+            for (var i = 0; i < PREMIUM_CONFIG.length; i++) {
+                if (PREMIUM_CONFIG[i].id === userId && todayNum <= Number(PREMIUM_CONFIG[i].waktu)) return true;
+            }
+            return false;
+        }
+
+        var allVocabData = [
+            { level:1, category:"Mengenal orang", words:[
+                {jp:"わたし",romaji:"watashi",arti:"Saya"},{jp:"あなた",romaji:"anata",arti:"Anda"},{jp:"かれ",romaji:"kare",arti:"Dia (L)"},{jp:"かのじょ",romaji:"kanojo",arti:"Dia (P)"},{jp:"わたしたち",romaji:"watashitachi",arti:"Kami"},{jp:"かれら",romaji:"karera",arti:"Mereka"},{jp:"ぼく",romaji:"boku",arti:"Aku (L)"},{jp:"おんなのこ",romaji:"onnanoko",arti:"Anak perempuan"},{jp:"おとこのこ",romaji:"otokonoko",arti:"Anak laki-laki"},{jp:"ひと",romaji:"hito",arti:"Orang"}
+            ]},
+            { level:2, category:"Mengenal benda", words:[
+                {jp:"ほん",romaji:"hon",arti:"Buku"},{jp:"つくえ",romaji:"tsukue",arti:"Meja"},{jp:"いす",romaji:"isu",arti:"Kursi"},{jp:"まど",romaji:"mado",arti:"Jendela"},{jp:"ドア",romaji:"doa",arti:"Pintu"},{jp:"でんわ",romaji:"denwa",arti:"Telepon"},{jp:"かばん",romaji:"kaban",arti:"Tas"},{jp:"かみ",romaji:"kami",arti:"Kertas"},{jp:"とけい",romaji:"tokei",arti:"Jam"},{jp:"かぎ",romaji:"kagi",arti:"Kunci"}
+            ]},
+            { level:3, category:"Mengenal kata kerja", words:[
+                {jp:"たべる",romaji:"taberu",arti:"Makan"},{jp:"のむ",romaji:"nomu",arti:"Minum"},{jp:"いく",romaji:"iku",arti:"Pergi"},{jp:"くる",romaji:"kuru",arti:"Datang"},{jp:"みる",romaji:"miru",arti:"Lihat"},{jp:"きく",romaji:"kiku",arti:"Dengar"},{jp:"かく",romaji:"kaku",arti:"Tulis"},{jp:"よむ",romaji:"yomu",arti:"Baca"},{jp:"はなす",romaji:"hanasu",arti:"Bicara"},{jp:"あるく",romaji:"aruku",arti:"Jalan"}
+            ]},
+            { level:4, category:"Mengenal kata sifat", words:[
+                {jp:"おおきい",romaji:"ookii",arti:"Besar"},{jp:"ちいさい",romaji:"chiisai",arti:"Kecil"},{jp:"あたらしい",romaji:"atarashii",arti:"Baru"},{jp:"ふるい",romaji:"furui",arti:"Lama"},{jp:"たかい",romaji:"takai",arti:"Mahal/Tinggi"},{jp:"やすい",romaji:"yasui",arti:"Murah"},{jp:"あつい",romaji:"atsui",arti:"Panas"},{jp:"さむい",romaji:"samui",arti:"Dingin"},{jp:"おいしい",romaji:"oishii",arti:"Enak"},{jp:"たのしい",romaji:"tanoshii",arti:"Menyenangkan"}
+            ]},
+            { level:5, category:"Percakapan dasar", words:[
+                {jp:"おはよう",romaji:"ohayou",arti:"Selamat pagi"},{jp:"こんにちは",romaji:"konnichiwa",arti:"Halo/Siang"},{jp:"こんばんは",romaji:"konbanwa",arti:"Selamat malam"},{jp:"ありがとう",romaji:"arigatou",arti:"Terima kasih"},{jp:"すみません",romaji:"sumimasen",arti:"Maaf"},{jp:"はい",romaji:"hai",arti:"Ya"},{jp:"いいえ",romaji:"iie",arti:"Tidak"},{jp:"おやすみ",romaji:"oyasumi",arti:"Selamat tidur"},{jp:"さようなら",romaji:"sayounara",arti:"Selamat tinggal"},{jp:"またね",romaji:"matane",arti:"Sampai jumpa"}
+            ]},
+            { level:6, category:"Angka & waktu", words:[
+                {jp:"いち",romaji:"ichi",arti:"Satu"},{jp:"に",romaji:"ni",arti:"Dua"},{jp:"さん",romaji:"san",arti:"Tiga"},{jp:"じ",romaji:"ji",arti:"Jam"},{jp:"ふん",romaji:"fun",arti:"Menit"},{jp:"きょう",romaji:"kyou",arti:"Hari ini"},{jp:"あした",romaji:"ashita",arti:"Besok"},{jp:"きのう",romaji:"kinou",arti:"Kemarin"},{jp:"あさ",romaji:"asa",arti:"Pagi"},{jp:"よる",romaji:"yoru",arti:"Malam"}
+            ]},
+            { level:7, category:"Keluarga & pekerjaan", words:[
+                {jp:"かぞく",romaji:"kazoku",arti:"Keluarga"},{jp:"おとうさん",romaji:"otousan",arti:"Ayah"},{jp:"おかあさん",romaji:"okaasan",arti:"Ibu"},{jp:"せんせい",romaji:"sensei",arti:"Guru"},{jp:"いしゃ",romaji:"isha",arti:"Dokter"},{jp:"がくせい",romaji:"gakusei",arti:"Pelajar"},{jp:"かいしゃいん",romaji:"kaishain",arti:"Karyawan"},{jp:"おにいさん",romaji:"oniisan",arti:"Kakak (L)"},{jp:"おねえさん",romaji:"oneesan",arti:"Kakak (P)"},{jp:"あかちゃん",romaji:"akachan",arti:"Bayi"}
+            ]},
+            { level:8, category:"Makanan & minuman", words:[
+                {jp:"ごはん",romaji:"gohan",arti:"Nasi"},{jp:"みず",romaji:"mizu",arti:"Air"},{jp:"にく",romaji:"niku",arti:"Daging"},{jp:"さかな",romaji:"sakana",arti:"Ikan"},{jp:"やさい",romaji:"yasai",arti:"Sayur"},{jp:"くだもの",romaji:"kudamono",arti:"Buah"},{jp:"たまご",romaji:"tamago",arti:"Telur"},{jp:"パン",romaji:"pan",arti:"Roti"},{jp:"おちゃ",romaji:"ocha",arti:"Teh"},{jp:"ぎゅうにゅう",romaji:"gyuunyuu",arti:"Susu"}
+            ]},
+            { level:9, category:"Tempat & arah", words:[
+                {jp:"がっこう",romaji:"gakkou",arti:"Sekolah"},{jp:"えき",romaji:"eki",arti:"Stasiun"},{jp:"みせ",romaji:"mise",arti:"Toko"},{jp:"びょういん",romaji:"byouin",arti:"Rumah sakit"},{jp:"こうえん",romaji:"kouen",arti:"Taman"},{jp:"みぎ",romaji:"migi",arti:"Kanan"},{jp:"ひだり",romaji:"hidari",arti:"Kiri"},{jp:"うえ",romaji:"ue",arti:"Atas"},{jp:"した",romaji:"shita",arti:"Bawah"},{jp:"となり",romaji:"tonari",arti:"Sebelah"}
+            ]},
+            { level:10, category:"Kosakata ahli", words:[
+                {jp:"けいざい",romaji:"keizai",arti:"Ekonomi"},{jp:"ぎじゅつ",romaji:"gijutsu",arti:"Teknologi"},{jp:"かんきょう",romaji:"kankyou",arti:"Lingkungan"},{jp:"せいじ",romaji:"seiji",arti:"Politik"},{jp:"ぶんか",romaji:"bunka",arti:"Budaya"},{jp:"けんこう",romaji:"kenkou",arti:"Kesehatan"},{jp:"きょういく",romaji:"kyouiku",arti:"Pendidikan"},{jp:"こくさい",romaji:"kokusai",arti:"Internasional"},{jp:"しゃかい",romaji:"shakai",arti:"Masyarakat"},{jp:"かがく",romaji:"kagaku",arti:"Sains"}
+            ]}
+        ];
+
+        var PATTERNS = [[0,1,2,3,4,5,6,7,8,9],[1,3,5,7,9,0,2,4,6,8],[9,8,7,6,5,4,3,2,1,0]];
+        var currentLevel=1, currentPattern=0, patternQuestions=[], currentQuestionIndex=0, answered=false;
+        var isReviewMode=false, reviewLevel=1, mistakes=[], isMistakeRound=false, mistakeQuestions=[], mistakeIndex=0;
+        var completedLevels={};
+
+        function loadCompletedLevels(){ var d=localStorage.getItem('kotoba_completed_levels'); completedLevels=d?JSON.parse(d):{}; }
+        function saveCompletedLevels(){ localStorage.setItem('kotoba_completed_levels',JSON.stringify(completedLevels)); }
+        function markQuestionCompleted(lvl,qi){ if(!completedLevels[lvl])completedLevels[lvl]=[]; if(completedLevels[lvl].indexOf(qi)===-1){completedLevels[lvl].push(qi);saveCompletedLevels();} }
+        function isQuestionCompleted(lvl,qi){ return completedLevels[lvl]&&completedLevels[lvl].indexOf(qi)!==-1; }
+        function getCurrentUserPremium(){ var u=getUser(); return u?checkPremiumByConfig(u.id):false; }
+        function isQuestionLocked(lvl,qi){ if(lvl===1)return false; if(isQuestionCompleted(lvl,qi))return false; return !getCurrentUserPremium(); }
+        function getActiveLevel(){ return isReviewMode?reviewLevel:currentLevel; }
+
+        function generateQ(word,lvl,qi){
+            var vocab=allVocabData[lvl-1].words;
+            var opts=[word.arti];
+            var others=vocab.filter(function(w){return w.jp!==word.jp;}).sort(function(){return Math.random()-0.5;});
+            for(var j=0;j<3;j++)opts.push(others[j].arti);
+            opts.sort(function(){return Math.random()-0.5;});
+            return {japanese:word.jp,romaji:word.romaji,correct:word.arti,options:opts,level:lvl,questionIndex:qi};
+        }
+        function generateQuestions(lvl,pat){ var vocab=allVocabData[lvl-1].words; return PATTERNS[pat].map(function(i){return generateQ(vocab[i],lvl,i);}); }
+
+        function loadPattern(){ mistakes=[]; isMistakeRound=false; mistakeQuestions=[]; patternQuestions=generateQuestions(getActiveLevel(),currentPattern); currentQuestionIndex=0; updateProgress(); loadCurrentQuestion(); }
+        function loadCurrentQuestion(){
+            if(isMistakeRound){ if(mistakeIndex>=mistakeQuestions.length){allPatternsComplete();return;} answered=false; updateQuestionUI(mistakeQuestions[mistakeIndex]); updateProgress(); return; }
+            if(currentQuestionIndex>=10){patternComplete();return;}
+            answered=false; updateQuestionUI(patternQuestions[currentQuestionIndex]); updateProgress();
+            if(!isMistakeRound&&currentQuestionIndex===0&&currentPattern===0)setTimeout(function(){speakWord();},500);
+        }
+        function updateQuestionUI(q){
+            document.getElementById('questionJapanese').textContent=q.japanese;
+            document.getElementById('questionRomaji').textContent=q.romaji;
+            document.getElementById('questionLabel').textContent='Soal '+((isMistakeRound?mistakeIndex:currentQuestionIndex)+1)+' dari 10';
+            var lbs=[document.getElementById('letterA'),document.getElementById('letterB'),document.getElementById('letterC'),document.getElementById('letterD')];
+            var als=[document.getElementById('answerA'),document.getElementById('answerB'),document.getElementById('answerC'),document.getElementById('answerD')];
+            var locked=isQuestionLocked(q.level,q.questionIndex)&&!isReviewMode;
+            for(var i=0;i<4;i++)als[i].textContent=q.options[i];
+            if(locked){ for(var i=0;i<4;i++){lbs[i].innerHTML='<i class="fa-solid fa-lock"></i>';lbs[i].classList.add('locked-icon');} }
+            else{ for(var i=0;i<4;i++){lbs[i].classList.remove('locked-icon');lbs[i].textContent=String.fromCharCode(65+i);} }
+            var slots=document.querySelectorAll('.answer-card');
+            for(var i=0;i<slots.length;i++){slots[i].classList.remove('blurred','pulse');slots[i].style.pointerEvents='auto';}
+        }
+        function updateProgress(){ var t,d; if(isMistakeRound){t=mistakeQuestions.length;d=mistakeIndex;}else{t=30;d=currentPattern*10+currentQuestionIndex;} document.getElementById('progressFill').style.width=(t>0?d/t*100:0)+'%'; }
+        function checkAnswer(idx){
+            if(answered)return;
+            var q=isMistakeRound?mistakeQuestions[mistakeIndex]:patternQuestions[currentQuestionIndex];
+            if(isQuestionLocked(q.level,q.questionIndex)&&!isReviewMode){showPopup();return;}
+            answered=true;
+            if(q.options[idx]===q.correct){
+                if(!isMistakeRound&&!isReviewMode)markQuestionCompleted(q.level,q.questionIndex);
+                if(isMistakeRound)mistakeIndex++;else currentQuestionIndex++;
+                setTimeout(function(){loadCurrentQuestion();},400);
+            }else{
+                if(!isMistakeRound)mistakes.push(q);else mistakeQuestions.push(q);
+                var slots=document.querySelectorAll('.answer-card');
+                for(var i=0;i<slots.length;i++){if(q.options[i]!==q.correct)slots[i].classList.add('blurred');}
+                for(var i=0;i<slots.length;i++){if(q.options[i]===q.correct)slots[i].classList.add('pulse');}
+                setTimeout(function(){if(isMistakeRound)mistakeIndex++;else currentQuestionIndex++;loadCurrentQuestion();},3000);
+            }
+        }
+        function patternComplete(){ currentPattern++; if(currentPattern>=3){ if(mistakes.length>0){isMistakeRound=true;mistakeQuestions=mistakes.slice();mistakeIndex=0;updateProgress();loadCurrentQuestion();}else allPatternsComplete(); }else loadPattern(); }
+        function allPatternsComplete(){
+            if(!isReviewMode){ var ml=parseInt(localStorage.getItem('kotoba_max_level')||'1'); if(currentLevel>=ml&&currentLevel<10){ localStorage.setItem('kotoba_max_level',currentLevel+1); currentLevel=currentLevel+1; document.getElementById('popupLevelDesc').textContent='Kamu lolos ke level selanjutnya!'; document.getElementById('popupLevelOverlay').classList.add('show'); } }
+            currentPattern=0; isMistakeRound=false; mistakes=[]; mistakeQuestions=[];
+            if(isReviewMode){isReviewMode=false;currentLevel=parseInt(localStorage.getItem('kotoba_max_level')||'1');}
+            updateLevelButton(); updateLevelPanel(); updateKamus(); loadPattern();
+        }
+        function repeatLevel(){ document.getElementById('popupLevelOverlay').classList.remove('show'); isReviewMode=true; reviewLevel=currentLevel; currentPattern=0; isMistakeRound=false; mistakes=[]; mistakeQuestions=[]; updateLevelButton(); loadPattern(); }
+        function nextLevel(){ document.getElementById('popupLevelOverlay').classList.remove('show'); isReviewMode=false; currentPattern=0; isMistakeRound=false; mistakes=[]; mistakeQuestions=[]; updateLevelButton(); updateLevelPanel(); updateKamus(); loadPattern(); }
+        function updateLevelButton(){ document.getElementById('btnLv').textContent='Lv.'+getActiveLevel(); }
+        function updateLevelPanel(){
+            var ml=parseInt(localStorage.getItem('kotoba_max_level')||'1'); var ll=document.getElementById('levelList'); var h='';
+            for(var i=1;i<=10;i++){ var st,at,ac; if(i<ml){st='completed';at='Mengulas';ac='review';}else if(i===ml){st='current';at='Lanjutkan';ac='continue';}else{st='locked';at='Menanti';ac='wait';} var lb=i===10?'Max':'Lv.'+i; h+='<div class="level-row"><button class="level-btn '+st+'">'+lb+'</button><div class="level-info"><p class="level-name">'+allVocabData[i-1].category+'</p></div><button class="level-action '+ac+'" onclick="levelAction('+i+',\''+st+'\')">'+at+'</button></div>'; if(i<10)h+='<div class="level-connector"></div>'; }
+            ll.innerHTML=h;
+        }
+        function levelAction(level,status){ closeLevelPanel(); if(status==='review'){isReviewMode=true;reviewLevel=level;}else{currentLevel=level;isReviewMode=false;} currentPattern=0; isMistakeRound=false; mistakes=[]; mistakeQuestions=[]; updateLevelButton(); loadPattern(); }
+        function updateKamus(){
+            var ml=parseInt(localStorage.getItem('kotoba_max_level')||'1'); var ip=getCurrentUserPremium(); var vg=document.getElementById('vocabGrid'); var pb=document.getElementById('premiumUpgradeBtn'); var h='';
+            for(var i=0;i<allVocabData.length;i++){ var cat=allVocabData[i]; h+='<div class="category-divider" style="width:100%;"><div class="category-line"></div><span class="category-text">'+cat.category+'</span><div class="category-line"></div></div>'; for(var j=0;j<cat.words.length;j++){ var w=cat.words[j]; var lk=false; if(!ip){ if(i+1>ml)lk=true; else if(i+1>=2&&!isQuestionCompleted(i+1,j))lk=true; } h+='<div class="vocab-card '+(lk?'locked':'')+'"><p class="vocab-japanese">'+w.jp+'</p><p class="vocab-romaji">'+w.romaji+'</p><div class="vocab-divider"></div><p class="vocab-meaning">'+w.arti+'</p></div>'; } }
+            vg.innerHTML=h; pb.style.display=ip?'none':'flex';
+        }
+        function speakWord(){ var t=document.getElementById('questionJapanese').textContent; if('speechSynthesis' in window){ window.speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang='ja-JP';u.rate=0.8;u.pitch=1; window.speechSynthesis.speak(u); } }
+
+        // ====== SHARE (ANTI KEYBOARD) ======
+        var copyTimeout=null;
+        function copyShareLink(event){
+            if(event){ event.preventDefault(); }
+            if(document.activeElement){ document.activeElement.blur(); }
+
+            var urlEl=document.getElementById('shareUrl');
+            var originalUrl='https://akiyama1502.github.io/kotoba/';
+
+            if(navigator.clipboard && navigator.clipboard.writeText){
+                navigator.clipboard.writeText(originalUrl).then(function(){
+                    showCopiedFeedback(urlEl, originalUrl);
+                }).catch(function(){
+                    fallbackCopy(originalUrl, urlEl);
+                });
+            } else {
+                fallbackCopy(originalUrl, urlEl);
+            }
+            return false;
+        }
+
+        function fallbackCopy(text, urlEl){
+            var textarea=document.createElement('textarea');
+            textarea.value=text;
+            textarea.style.position='fixed';
+            textarea.style.left='-9999px';
+            textarea.style.top='-9999px';
+            textarea.style.opacity='0';
+            textarea.setAttribute('readonly','readonly');
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try{
+                document.execCommand('copy');
+                showCopiedFeedback(urlEl, text);
+            }catch(e){
+                urlEl.textContent='Gagal menyalin';
+                urlEl.classList.add('copied');
+                if(copyTimeout)clearTimeout(copyTimeout);
+                copyTimeout=setTimeout(function(){ urlEl.textContent=text; urlEl.classList.remove('copied'); },2000);
+            }
+            document.body.removeChild(textarea);
+            if(document.activeElement){ document.activeElement.blur(); }
+        }
+
+        function showCopiedFeedback(urlEl, originalUrl){
+            urlEl.textContent='Tautan sudah tersalin';
+            urlEl.classList.add('copied');
+            if(copyTimeout)clearTimeout(copyTimeout);
+            copyTimeout=setTimeout(function(){
+                urlEl.textContent=originalUrl;
+                urlEl.classList.remove('copied');
+            },2000);
+        }
+
+        var mainContainer=document.getElementById('mainContainer');
+        function simpleHash(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h=h&h;}return Math.abs(h);}
+        function generateFullID(){var n=new Date();var r=[String(n.getSeconds()).padStart(2,'0'),String(n.getMinutes()).padStart(2,'0'),String(n.getHours()).padStart(2,'0'),String(n.getDate()).padStart(2,'0'),String(n.getMonth()+1).padStart(2,'0'),n.getFullYear()].join('');return'KTB-'+String(simpleHash(r+'KOTOBA_SECRET_SALT_2026')).padStart(8,'0').substring(0,8);}
+        function saveUser(name,id){localStorage.setItem('kotoba_user',JSON.stringify({name:name,id:id,registeredAt:new Date().toISOString()}));}
+        function getUser(){var d=localStorage.getItem('kotoba_user');return d?JSON.parse(d):null;}
+
+        function updatePremiumUI(isPremium){
+            var display=document.getElementById('userNameDisplay');
+            var existing=display.querySelector('.premium-crown-icon');
+            if(isPremium){if(!existing){var span=document.createElement('span');span.className='premium-crown-icon';span.innerHTML='<i class="fa-solid fa-crown"></i>';display.appendChild(span);}}
+            else{if(existing)existing.remove();}
+        }
+
+        function registerUser(){
+            var ni=document.getElementById('nameInput');var nm=ni.value.trim();
+            if(!nm){document.getElementById('registerError').style.display='block';return;}
+            document.getElementById('registerError').style.display='none';
+            var id=generateFullID();saveUser(nm,id);
+            document.getElementById('userNameDisplay').textContent=nm;
+            document.getElementById('userIdDisplay').textContent='ID: '+id;
+            document.getElementById('registerContainer').classList.add('hidden');
+            mainContainer.classList.remove('hidden-behind');
+            if(!localStorage.getItem('kotoba_max_level'))localStorage.setItem('kotoba_max_level','1');
+            currentLevel=parseInt(localStorage.getItem('kotoba_max_level')||'1');
+            loadCompletedLevels();
+            updatePremiumUI(checkPremiumByConfig(id));
+            updateLevelButton();updateLevelPanel();updateKamus();loadPattern();
+            setTimeout(function(){document.getElementById('sessionWrapper').classList.add('zoom-in');},100);
+        }
+        function checkRegistration(){
+            var u=getUser();
+            if(u){
+                document.getElementById('userNameDisplay').textContent=u.name;
+                document.getElementById('userIdDisplay').textContent='ID: '+u.id;
+                document.getElementById('registerContainer').classList.add('hidden');
+                mainContainer.classList.remove('hidden-behind');
+                if(!localStorage.getItem('kotoba_max_level'))localStorage.setItem('kotoba_max_level','1');
+                currentLevel=parseInt(localStorage.getItem('kotoba_max_level')||'1');
+                loadCompletedLevels();
+                updatePremiumUI(checkPremiumByConfig(u.id));
+                updateLevelButton();updateLevelPanel();updateKamus();loadPattern();
+                setTimeout(function(){document.getElementById('sessionWrapper').classList.add('zoom-in');},100);
+            }else{mainContainer.classList.add('hidden-behind');}
+        }
+        function showPopup(){document.getElementById('popupOverlay').classList.add('show');}
+        function closePopup(){document.getElementById('popupOverlay').classList.remove('show');}
+        function goToWhatsApp(){var u=getUser();var nm=u?u.name:'Pengguna';var id=u?u.id:'Belum terdaftar';var msg='Halo, Ka saya...\n\nNama: '+nm+'\nID: '+id+'\n\nSaya dari Apk/Web KOTOBA yang Kaka buat, dan saya ingin akses fitur premium. Mohon untuk di izinkan.\n\nTerimakasih';window.open('https://wa.me/628567858301?text='+encodeURIComponent(msg),'_blank');}
+        document.addEventListener('keydown',function(e){if(e.key==='Enter'){var rc=document.getElementById('registerContainer');if(!rc.classList.contains('hidden'))registerUser();}});
+        function openPanel(){document.getElementById('slidePanel').classList.add('open');updateKamus();}
+        function closePanel(){document.getElementById('slidePanel').classList.remove('open');}
+        function openLevelPanel(){document.getElementById('levelPanel').classList.add('open');updateLevelPanel();}
+        function closeLevelPanel(){document.getElementById('levelPanel').classList.remove('open');}
+
+        mainContainer.classList.add('hidden-behind');
+        checkRegistration();
+    </script>
+</body>
+</html>
