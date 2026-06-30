@@ -279,7 +279,7 @@
             document.addEventListener('keydown', function(e){ if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&e.key==='I')||(e.ctrlKey&&e.shiftKey&&e.key==='J')||(e.ctrlKey&&e.key==='U')||(e.ctrlKey&&e.shiftKey&&e.key==='C')){ e.preventDefault(); return false; } });
         })();
 
-        var PREMIUM_CONFIG = [ { id: "KTB-1526333", waktu: "31129999" }, ];
+        var PREMIUM_CONFIG = [ { id: "KTB-15263331", waktu: "31129999" }, ];
 
         function checkPremiumByConfig(userId) { if(!userId)return false; var now=new Date(); var today=String(now.getDate()).padStart(2,'0')+String(now.getMonth()+1).padStart(2,'0')+now.getFullYear(); var todayNum=Number(today); for(var i=0;i<PREMIUM_CONFIG.length;i++){ if(PREMIUM_CONFIG[i].id===userId&&todayNum<=Number(PREMIUM_CONFIG[i].waktu))return true; } return false; }
 
