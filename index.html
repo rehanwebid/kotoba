@@ -1,19 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <script>
-    // Request audio permission saat halaman pertama kali dibuka
-    document.addEventListener('click', function initAudio() {
-        // Buat audio dummy untuk unlock audio
-        var dummy = new Audio();
-        dummy.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
-        dummy.play().then(function() {
-            dummy.pause();
-            dummy = null;
-        }).catch(function() {});
-        document.removeEventListener('click', initAudio);
-    }, { once: true });
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KOTOBA - Belajar Bahasa Jepang</title>
@@ -36,6 +23,21 @@
         body { background:var(--bg); width:100vw; height:100dvh; overflow:hidden; position:relative; font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; -webkit-font-smoothing:antialiased; }
         button,div,span,p,h1,h2,h3,input { -webkit-tap-highlight-color:transparent; outline:none; font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; }
         button:focus,div:focus,span:focus,p:focus,h1:focus,h2:focus,h3:focus,input:focus { outline:none; }
+
+        .splash-overlay {
+            position:absolute; top:0; left:0; width:100vw; height:100dvh; z-index:100;
+            background:linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+            display:flex; flex-direction:column; justify-content:center; align-items:center;
+            transition:opacity 0.6s ease, transform 0.6s ease; opacity:1; transform:scale(1);
+        }
+        .splash-overlay.hidden { opacity:0; transform:scale(0.95); pointer-events:none; }
+        .splash-logo { width:80px; height:80px; background:rgba(255,255,255,0.2); border-radius:24px; display:flex; justify-content:center; align-items:center; margin-bottom:20px; font-size:40px; color:white; animation:splashPulse 2s ease-in-out infinite; }
+        @keyframes splashPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+        .splash-title { color:white; font-family:'Noto Sans JP',sans-serif; font-size:28px; font-weight:700; letter-spacing:0.05em; margin-bottom:4px; }
+        .splash-subtitle { color:rgba(255,255,255,0.7); font-size:12px; font-weight:400; letter-spacing:0.03em; }
+        .splash-loader { width:40px; height:3px; background:rgba(255,255,255,0.2); border-radius:2px; margin-top:28px; overflow:hidden; }
+        .splash-loader-fill { height:100%; width:0%; background:white; border-radius:2px; animation:splashLoad 2.3s ease-in-out forwards; }
+        @keyframes splashLoad { 0%{width:0%;} 50%{width:60%;} 80%{width:85%;} 100%{width:100%;} }
 
         .register-container { position:absolute; top:0; left:0; width:100vw; height:100dvh; z-index:20; display:flex; justify-content:center; align-items:center; background:linear-gradient(180deg,#eef2ff 0%,#f8fafc 50%,#f1f5f9 100%); transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.5s cubic-bezier(0.25,0.46,0.45,0.94); }
         .register-container.hidden { transform:scale(0.9); opacity:0; pointer-events:none; }
@@ -76,15 +78,15 @@
         .btn-book { width:44px; height:44px; background:var(--primary); border:none; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; color:white; font-size:18px; box-shadow:0 4px 12px rgba(99,102,241,0.35); transition:transform 0.2s,box-shadow 0.2s; }
         .btn-book:active { transform:scale(0.95); background:var(--primary-dark); }
 
-        .session-wrapper { width:100%; display:flex; flex-direction:column; align-items:center; padding-top:14vh; transform:scale(0.9); opacity:0; transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.5s cubic-bezier(0.25,0.46,0.45,0.94); }
+        .session-wrapper { width:100%; display:flex; flex-direction:column; align-items:center; padding-top:calc(16vh + 30px); transform:scale(0.9); opacity:0; transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94),opacity 0.5s cubic-bezier(0.25,0.46,0.45,0.94); }
         .session-wrapper.zoom-in { transform:scale(1); opacity:1; }
         .session-wrapper.zoom-out { transform:scale(0.9); opacity:0; }
-        .question-card { width:82vw; max-width:360px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px 20px 20px; display:flex; flex-direction:column; justify-content:center; align-items:center; box-shadow:var(--shadow-md); margin-bottom:28px; position:relative; }
-        .btn-speaker { position:absolute; top:10px; right:12px; width:32px; height:32px; background:var(--primary-light); border:none; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; color:var(--primary); font-size:14px; transition:all 0.2s; }
-        .btn-speaker:active { background:var(--primary); color:white; transform:scale(0.95); }
-        .question-label { color:var(--text-muted); font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px; }
-        .main-text { color:var(--primary); font-family:'Noto Sans JP',sans-serif; font-size:48px; font-weight:700; line-height:1.2; }
-        .romaji-text { color:var(--text); font-family:'Inter',sans-serif; font-size:15px; font-weight:500; margin-top:8px; letter-spacing:0.02em; }
+
+        .question-card { width:82vw; max-width:360px; background:var(--primary); border:none; border-radius:var(--radius-lg); padding:32px 20px; display:flex; flex-direction:column; justify-content:center; align-items:center; box-shadow:0 8px 24px rgba(99,102,241,0.35); margin-bottom:28px; position:relative; }
+        .question-label { color:rgba(255,255,255,0.7); font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px; }
+        .main-text { color:white; font-family:'Noto Sans JP',sans-serif; font-size:48px; font-weight:700; line-height:1.2; }
+        .romaji-text { color:rgba(255,255,255,0.8); font-family:'Inter',sans-serif; font-size:15px; font-weight:500; margin-top:8px; letter-spacing:0.02em; }
+
         .answer-container { width:82vw; max-width:360px; display:flex; flex-direction:column; gap:10px; }
         .answer-card { width:100%; height:48px; background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius); display:flex; align-items:center; padding:0 14px; cursor:pointer; transition:all 0.2s; position:relative; box-shadow:var(--shadow-sm); }
         .answer-card:active { background:var(--surface-hover); transform:scale(0.99); }
@@ -109,7 +111,6 @@
         .vocab-grid { display:flex; flex-wrap:wrap; gap:10px; }
         .vocab-card { width:calc(50% - 5px); background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 12px; display:flex; flex-direction:column; align-items:center; transition:all 0.3s; box-shadow:var(--shadow-sm); }
         .vocab-card.locked { opacity:0.4; filter:blur(3px); pointer-events:none; }
-        .vocab-card.unlocked { opacity:1; filter:blur(0); }
         .vocab-japanese { color:var(--primary); font-family:'Noto Sans JP',sans-serif; font-size:22px; font-weight:700; margin-bottom:4px; }
         .vocab-romaji { color:var(--text); font-size:11px; font-weight:500; margin-bottom:10px; }
         .vocab-divider { width:100%; height:1px; background:var(--border-light); margin-bottom:10px; }
@@ -170,6 +171,13 @@
     </style>
 </head>
 <body>
+    <div class="splash-overlay" id="splashOverlay">
+        <div class="splash-logo"><i class="fa-solid fa-language"></i></div>
+        <h1 class="splash-title">KOTOBA</h1>
+        <p class="splash-subtitle">Belajar kosakata bahasa Jepang</p>
+        <div class="splash-loader"><div class="splash-loader-fill"></div></div>
+    </div>
+
     <div class="register-container" id="registerContainer">
         <div class="register-box">
             <div class="register-logo"><i class="fa-solid fa-language"></i></div>
@@ -219,7 +227,6 @@
         <div class="session-wrapper" id="sessionWrapper">
             <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
             <div class="question-card">
-                <button class="btn-speaker" onclick="speakWord()"><i class="fa-solid fa-volume-high"></i></button>
                 <p class="question-label" id="questionLabel">Pilih Arti yang Tepat</p>
                 <p class="main-text" id="questionJapanese">わたし</p>
                 <p class="romaji-text" id="questionRomaji">watashi</p>
@@ -263,213 +270,58 @@
     </div>
 
     <script>
-        // ====== ANTI BOCOR ======
+        var splashStartTime=Date.now();
+        function hideSplash(){ var splash=document.getElementById('splashOverlay'); splash.classList.add('hidden'); setTimeout(function(){ splash.style.display='none'; },700); }
+        function hideSplashAfterMin(){ var elapsed=Date.now()-splashStartTime; var remaining=Math.max(0,2500-elapsed); setTimeout(hideSplash,remaining); }
+
         (function(){
             document.addEventListener('contextmenu', function(e){ e.preventDefault(); return false; });
-            document.addEventListener('keydown', function(e){
-                if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&e.key==='I')||(e.ctrlKey&&e.shiftKey&&e.key==='J')||(e.ctrlKey&&e.key==='U')||(e.ctrlKey&&e.shiftKey&&e.key==='C')){ e.preventDefault(); return false; }
-            });
+            document.addEventListener('keydown', function(e){ if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&e.key==='I')||(e.ctrlKey&&e.shiftKey&&e.key==='J')||(e.ctrlKey&&e.key==='U')||(e.ctrlKey&&e.shiftKey&&e.key==='C')){ e.preventDefault(); return false; } });
         })();
 
-        // ====== KONFIGURASI PREMIUM ======
-        var PREMIUM_CONFIG = [
-            { id: "KTB-15263331", waktu: "31129999" },
-        ];
+        var PREMIUM_CONFIG = [ { id: "KTB-1526333", waktu: "31129999" }, ];
 
-        function checkPremiumByConfig(userId) {
-            if (!userId) return false;
-            var now = new Date();
-            var today = String(now.getDate()).padStart(2,'0') + String(now.getMonth()+1).padStart(2,'0') + now.getFullYear();
-            var todayNum = Number(today);
-            for (var i = 0; i < PREMIUM_CONFIG.length; i++) {
-                if (PREMIUM_CONFIG[i].id === userId && todayNum <= Number(PREMIUM_CONFIG[i].waktu)) return true;
-            }
-            return false;
-        }
+        function checkPremiumByConfig(userId) { if(!userId)return false; var now=new Date(); var today=String(now.getDate()).padStart(2,'0')+String(now.getMonth()+1).padStart(2,'0')+now.getFullYear(); var todayNum=Number(today); for(var i=0;i<PREMIUM_CONFIG.length;i++){ if(PREMIUM_CONFIG[i].id===userId&&todayNum<=Number(PREMIUM_CONFIG[i].waktu))return true; } return false; }
 
-        // ====== REFRESH PREMIUM SAAT HALAMAN VISIBLE ======
-        document.addEventListener('visibilitychange', function(){
-            if(!document.hidden){
-                var u=getUser();
-                if(u){
-                    updatePremiumUI(checkPremiumByConfig(u.id));
-                    updateKamus();
-                    updateLevelButton();
-                    updateLevelPanel();
-                }
-            }
-        });
+        document.addEventListener('visibilitychange', function(){ if(!document.hidden){ var u=getUser(); if(u){ updatePremiumUI(checkPremiumByConfig(u.id)); updateKamus(); updateLevelButton(); updateLevelPanel(); } } });
 
-        var allVocabData = [
-            { level:1, category:"Mengenal orang", words:[
-                {jp:"わたし",romaji:"watashi",arti:"Saya"},{jp:"あなた",romaji:"anata",arti:"Anda"},{jp:"かれ",romaji:"kare",arti:"Dia (L)"},{jp:"かのじょ",romaji:"kanojo",arti:"Dia (P)"},{jp:"わたしたち",romaji:"watashitachi",arti:"Kami"},{jp:"かれら",romaji:"karera",arti:"Mereka"},{jp:"ぼく",romaji:"boku",arti:"Aku (L)"},{jp:"おんなのこ",romaji:"onnanoko",arti:"Anak perempuan"},{jp:"おとこのこ",romaji:"otokonoko",arti:"Anak laki-laki"},{jp:"ひと",romaji:"hito",arti:"Orang"}
-            ]},
-            { level:2, category:"Mengenal benda", words:[
-                {jp:"ほん",romaji:"hon",arti:"Buku"},{jp:"つくえ",romaji:"tsukue",arti:"Meja"},{jp:"いす",romaji:"isu",arti:"Kursi"},{jp:"まど",romaji:"mado",arti:"Jendela"},{jp:"ドア",romaji:"doa",arti:"Pintu"},{jp:"でんわ",romaji:"denwa",arti:"Telepon"},{jp:"かばん",romaji:"kaban",arti:"Tas"},{jp:"かみ",romaji:"kami",arti:"Kertas"},{jp:"とけい",romaji:"tokei",arti:"Jam"},{jp:"かぎ",romaji:"kagi",arti:"Kunci"}
-            ]},
-            { level:3, category:"Mengenal kata kerja", words:[
-                {jp:"たべる",romaji:"taberu",arti:"Makan"},{jp:"のむ",romaji:"nomu",arti:"Minum"},{jp:"いく",romaji:"iku",arti:"Pergi"},{jp:"くる",romaji:"kuru",arti:"Datang"},{jp:"みる",romaji:"miru",arti:"Lihat"},{jp:"きく",romaji:"kiku",arti:"Dengar"},{jp:"かく",romaji:"kaku",arti:"Tulis"},{jp:"よむ",romaji:"yomu",arti:"Baca"},{jp:"はなす",romaji:"hanasu",arti:"Bicara"},{jp:"あるく",romaji:"aruku",arti:"Jalan"}
-            ]},
-            { level:4, category:"Mengenal kata sifat", words:[
-                {jp:"おおきい",romaji:"ookii",arti:"Besar"},{jp:"ちいさい",romaji:"chiisai",arti:"Kecil"},{jp:"あたらしい",romaji:"atarashii",arti:"Baru"},{jp:"ふるい",romaji:"furui",arti:"Lama"},{jp:"たかい",romaji:"takai",arti:"Mahal/Tinggi"},{jp:"やすい",romaji:"yasui",arti:"Murah"},{jp:"あつい",romaji:"atsui",arti:"Panas"},{jp:"さむい",romaji:"samui",arti:"Dingin"},{jp:"おいしい",romaji:"oishii",arti:"Enak"},{jp:"たのしい",romaji:"tanoshii",arti:"Menyenangkan"}
-            ]},
-            { level:5, category:"Percakapan dasar", words:[
-                {jp:"おはよう",romaji:"ohayou",arti:"Selamat pagi"},{jp:"こんにちは",romaji:"konnichiwa",arti:"Halo/Siang"},{jp:"こんばんは",romaji:"konbanwa",arti:"Selamat malam"},{jp:"ありがとう",romaji:"arigatou",arti:"Terima kasih"},{jp:"すみません",romaji:"sumimasen",arti:"Maaf"},{jp:"はい",romaji:"hai",arti:"Ya"},{jp:"いいえ",romaji:"iie",arti:"Tidak"},{jp:"おやすみ",romaji:"oyasumi",arti:"Selamat tidur"},{jp:"さようなら",romaji:"sayounara",arti:"Selamat tinggal"},{jp:"またね",romaji:"matane",arti:"Sampai jumpa"}
-            ]},
-            { level:6, category:"Angka & waktu", words:[
-                {jp:"いち",romaji:"ichi",arti:"Satu"},{jp:"に",romaji:"ni",arti:"Dua"},{jp:"さん",romaji:"san",arti:"Tiga"},{jp:"じ",romaji:"ji",arti:"Jam"},{jp:"ふん",romaji:"fun",arti:"Menit"},{jp:"きょう",romaji:"kyou",arti:"Hari ini"},{jp:"あした",romaji:"ashita",arti:"Besok"},{jp:"きのう",romaji:"kinou",arti:"Kemarin"},{jp:"あさ",romaji:"asa",arti:"Pagi"},{jp:"よる",romaji:"yoru",arti:"Malam"}
-            ]},
-            { level:7, category:"Keluarga & pekerjaan", words:[
-                {jp:"かぞく",romaji:"kazoku",arti:"Keluarga"},{jp:"おとうさん",romaji:"otousan",arti:"Ayah"},{jp:"おかあさん",romaji:"okaasan",arti:"Ibu"},{jp:"せんせい",romaji:"sensei",arti:"Guru"},{jp:"いしゃ",romaji:"isha",arti:"Dokter"},{jp:"がくせい",romaji:"gakusei",arti:"Pelajar"},{jp:"かいしゃいん",romaji:"kaishain",arti:"Karyawan"},{jp:"おにいさん",romaji:"oniisan",arti:"Kakak (L)"},{jp:"おねえさん",romaji:"oneesan",arti:"Kakak (P)"},{jp:"あかちゃん",romaji:"akachan",arti:"Bayi"}
-            ]},
-            { level:8, category:"Makanan & minuman", words:[
-                {jp:"ごはん",romaji:"gohan",arti:"Nasi"},{jp:"みず",romaji:"mizu",arti:"Air"},{jp:"にく",romaji:"niku",arti:"Daging"},{jp:"さかな",romaji:"sakana",arti:"Ikan"},{jp:"やさい",romaji:"yasai",arti:"Sayur"},{jp:"くだもの",romaji:"kudamono",arti:"Buah"},{jp:"たまご",romaji:"tamago",arti:"Telur"},{jp:"パン",romaji:"pan",arti:"Roti"},{jp:"おちゃ",romaji:"ocha",arti:"Teh"},{jp:"ぎゅうにゅう",romaji:"gyuunyuu",arti:"Susu"}
-            ]},
-            { level:9, category:"Tempat & arah", words:[
-                {jp:"がっこう",romaji:"gakkou",arti:"Sekolah"},{jp:"えき",romaji:"eki",arti:"Stasiun"},{jp:"みせ",romaji:"mise",arti:"Toko"},{jp:"びょういん",romaji:"byouin",arti:"Rumah sakit"},{jp:"こうえん",romaji:"kouen",arti:"Taman"},{jp:"みぎ",romaji:"migi",arti:"Kanan"},{jp:"ひだり",romaji:"hidari",arti:"Kiri"},{jp:"うえ",romaji:"ue",arti:"Atas"},{jp:"した",romaji:"shita",arti:"Bawah"},{jp:"となり",romaji:"tonari",arti:"Sebelah"}
-            ]},
-            { level:10, category:"Kosakata ahli", words:[
-                {jp:"けいざい",romaji:"keizai",arti:"Ekonomi"},{jp:"ぎじゅつ",romaji:"gijutsu",arti:"Teknologi"},{jp:"かんきょう",romaji:"kankyou",arti:"Lingkungan"},{jp:"せいじ",romaji:"seiji",arti:"Politik"},{jp:"ぶんか",romaji:"bunka",arti:"Budaya"},{jp:"けんこう",romaji:"kenkou",arti:"Kesehatan"},{jp:"きょういく",romaji:"kyouiku",arti:"Pendidikan"},{jp:"こくさい",romaji:"kokusai",arti:"Internasional"},{jp:"しゃかい",romaji:"shakai",arti:"Masyarakat"},{jp:"かがく",romaji:"kagaku",arti:"Sains"}
-            ]}
-        ];
+        var allVocabData = [ { level:1, category:"Mengenal orang", words:[ {jp:"わたし",romaji:"watashi",arti:"Saya"},{jp:"あなた",romaji:"anata",arti:"Anda"},{jp:"かれ",romaji:"kare",arti:"Dia (L)"},{jp:"かのじょ",romaji:"kanojo",arti:"Dia (P)"},{jp:"わたしたち",romaji:"watashitachi",arti:"Kami"},{jp:"かれら",romaji:"karera",arti:"Mereka"},{jp:"ぼく",romaji:"boku",arti:"Aku (L)"},{jp:"おんなのこ",romaji:"onnanoko",arti:"Anak perempuan"},{jp:"おとこのこ",romaji:"otokonoko",arti:"Anak laki-laki"},{jp:"ひと",romaji:"hito",arti:"Orang"} ]}, { level:2, category:"Mengenal benda", words:[ {jp:"ほん",romaji:"hon",arti:"Buku"},{jp:"つくえ",romaji:"tsukue",arti:"Meja"},{jp:"いす",romaji:"isu",arti:"Kursi"},{jp:"まど",romaji:"mado",arti:"Jendela"},{jp:"ドア",romaji:"doa",arti:"Pintu"},{jp:"でんわ",romaji:"denwa",arti:"Telepon"},{jp:"かばん",romaji:"kaban",arti:"Tas"},{jp:"かみ",romaji:"kami",arti:"Kertas"},{jp:"とけい",romaji:"tokei",arti:"Jam"},{jp:"かぎ",romaji:"kagi",arti:"Kunci"} ]}, { level:3, category:"Mengenal kata kerja", words:[ {jp:"たべる",romaji:"taberu",arti:"Makan"},{jp:"のむ",romaji:"nomu",arti:"Minum"},{jp:"いく",romaji:"iku",arti:"Pergi"},{jp:"くる",romaji:"kuru",arti:"Datang"},{jp:"みる",romaji:"miru",arti:"Lihat"},{jp:"きく",romaji:"kiku",arti:"Dengar"},{jp:"かく",romaji:"kaku",arti:"Tulis"},{jp:"よむ",romaji:"yomu",arti:"Baca"},{jp:"はなす",romaji:"hanasu",arti:"Bicara"},{jp:"あるく",romaji:"aruku",arti:"Jalan"} ]}, { level:4, category:"Mengenal kata sifat", words:[ {jp:"おおきい",romaji:"ookii",arti:"Besar"},{jp:"ちいさい",romaji:"chiisai",arti:"Kecil"},{jp:"あたらしい",romaji:"atarashii",arti:"Baru"},{jp:"ふるい",romaji:"furui",arti:"Lama"},{jp:"たかい",romaji:"takai",arti:"Mahal/Tinggi"},{jp:"やすい",romaji:"yasui",arti:"Murah"},{jp:"あつい",romaji:"atsui",arti:"Panas"},{jp:"さむい",romaji:"samui",arti:"Dingin"},{jp:"おいしい",romaji:"oishii",arti:"Enak"},{jp:"たのしい",romaji:"tanoshii",arti:"Menyenangkan"} ]}, { level:5, category:"Percakapan dasar", words:[ {jp:"おはよう",romaji:"ohayou",arti:"Selamat pagi"},{jp:"こんにちは",romaji:"konnichiwa",arti:"Halo/Siang"},{jp:"こんばんは",romaji:"konbanwa",arti:"Selamat malam"},{jp:"ありがとう",romaji:"arigatou",arti:"Terima kasih"},{jp:"すみません",romaji:"sumimasen",arti:"Maaf"},{jp:"はい",romaji:"hai",arti:"Ya"},{jp:"いいえ",romaji:"iie",arti:"Tidak"},{jp:"おやすみ",romaji:"oyasumi",arti:"Selamat tidur"},{jp:"さようなら",romaji:"sayounara",arti:"Selamat tinggal"},{jp:"またね",romaji:"matane",arti:"Sampai jumpa"} ]}, { level:6, category:"Angka & waktu", words:[ {jp:"いち",romaji:"ichi",arti:"Satu"},{jp:"に",romaji:"ni",arti:"Dua"},{jp:"さん",romaji:"san",arti:"Tiga"},{jp:"じ",romaji:"ji",arti:"Jam"},{jp:"ふん",romaji:"fun",arti:"Menit"},{jp:"きょう",romaji:"kyou",arti:"Hari ini"},{jp:"あした",romaji:"ashita",arti:"Besok"},{jp:"きのう",romaji:"kinou",arti:"Kemarin"},{jp:"あさ",romaji:"asa",arti:"Pagi"},{jp:"よる",romaji:"yoru",arti:"Malam"} ]}, { level:7, category:"Keluarga & pekerjaan", words:[ {jp:"かぞく",romaji:"kazoku",arti:"Keluarga"},{jp:"おとうさん",romaji:"otousan",arti:"Ayah"},{jp:"おかあさん",romaji:"okaasan",arti:"Ibu"},{jp:"せんせい",romaji:"sensei",arti:"Guru"},{jp:"いしゃ",romaji:"isha",arti:"Dokter"},{jp:"がくせい",romaji:"gakusei",arti:"Pelajar"},{jp:"かいしゃいん",romaji:"kaishain",arti:"Karyawan"},{jp:"おにいさん",romaji:"oniisan",arti:"Kakak (L)"},{jp:"おねえさん",romaji:"oneesan",arti:"Kakak (P)"},{jp:"あかちゃん",romaji:"akachan",arti:"Bayi"} ]}, { level:8, category:"Makanan & minuman", words:[ {jp:"ごはん",romaji:"gohan",arti:"Nasi"},{jp:"みず",romaji:"mizu",arti:"Air"},{jp:"にく",romaji:"niku",arti:"Daging"},{jp:"さかな",romaji:"sakana",arti:"Ikan"},{jp:"やさい",romaji:"yasai",arti:"Sayur"},{jp:"くだもの",romaji:"kudamono",arti:"Buah"},{jp:"たまご",romaji:"tamago",arti:"Telur"},{jp:"パン",romaji:"pan",arti:"Roti"},{jp:"おちゃ",romaji:"ocha",arti:"Teh"},{jp:"ぎゅうにゅう",romaji:"gyuunyuu",arti:"Susu"} ]}, { level:9, category:"Tempat & arah", words:[ {jp:"がっこう",romaji:"gakkou",arti:"Sekolah"},{jp:"えき",romaji:"eki",arti:"Stasiun"},{jp:"みせ",romaji:"mise",arti:"Toko"},{jp:"びょういん",romaji:"byouin",arti:"Rumah sakit"},{jp:"こうえん",romaji:"kouen",arti:"Taman"},{jp:"みぎ",romaji:"migi",arti:"Kanan"},{jp:"ひだり",romaji:"hidari",arti:"Kiri"},{jp:"うえ",romaji:"ue",arti:"Atas"},{jp:"した",romaji:"shita",arti:"Bawah"},{jp:"となり",romaji:"tonari",arti:"Sebelah"} ]}, { level:10, category:"Kosakata ahli", words:[ {jp:"けいざい",romaji:"keizai",arti:"Ekonomi"},{jp:"ぎじゅつ",romaji:"gijutsu",arti:"Teknologi"},{jp:"かんきょう",romaji:"kankyou",arti:"Lingkungan"},{jp:"せいじ",romaji:"seiji",arti:"Politik"},{jp:"ぶんか",romaji:"bunka",arti:"Budaya"},{jp:"けんこう",romaji:"kenkou",arti:"Kesehatan"},{jp:"きょういく",romaji:"kyouiku",arti:"Pendidikan"},{jp:"こくさい",romaji:"kokusai",arti:"Internasional"},{jp:"しゃかい",romaji:"shakai",arti:"Masyarakat"},{jp:"かがく",romaji:"kagaku",arti:"Sains"} ]} ];
 
-        var PATTERNS = [[0,1,2,3,4,5,6,7,8,9],[1,3,5,7,9,0,2,4,6,8],[9,8,7,6,5,4,3,2,1,0]];
-        var currentLevel=1, currentPattern=0, patternQuestions=[], currentQuestionIndex=0, answered=false;
-        var isReviewMode=false, reviewLevel=1, mistakes=[], isMistakeRound=false, mistakeQuestions=[], mistakeIndex=0;
-        var completedLevels={};
+        var PATTERNS=[[0,1,2,3,4,5,6,7,8,9],[1,3,5,7,9,0,2,4,6,8],[9,8,7,6,5,4,3,2,1,0]];
+        var currentLevel=1,currentPattern=0,patternQuestions=[],currentQuestionIndex=0,answered=false,isReviewMode=false,reviewLevel=1,mistakes=[],isMistakeRound=false,mistakeQuestions=[],mistakeIndex=0,completedLevels={},sessionWrapper=document.getElementById('sessionWrapper');
 
-        function loadCompletedLevels(){ var d=localStorage.getItem('kotoba_completed_levels'); completedLevels=d?JSON.parse(d):{}; }
-        function saveCompletedLevels(){ localStorage.setItem('kotoba_completed_levels',JSON.stringify(completedLevels)); }
-        function markQuestionCompleted(lvl,qi){ if(!completedLevels[lvl])completedLevels[lvl]=[]; if(completedLevels[lvl].indexOf(qi)===-1){completedLevels[lvl].push(qi);saveCompletedLevels();} }
-        function isQuestionCompleted(lvl,qi){ return completedLevels[lvl]&&completedLevels[lvl].indexOf(qi)!==-1; }
-        function getCurrentUserPremium(){ var u=getUser(); return u?checkPremiumByConfig(u.id):false; }
-        function isQuestionLocked(lvl,qi){ if(lvl===1)return false; if(isQuestionCompleted(lvl,qi))return false; return !getCurrentUserPremium(); }
-        function getActiveLevel(){ return isReviewMode?reviewLevel:currentLevel; }
+        function loadCompletedLevels(){var d=localStorage.getItem('kotoba_completed_levels');completedLevels=d?JSON.parse(d):{};}
+        function saveCompletedLevels(){localStorage.setItem('kotoba_completed_levels',JSON.stringify(completedLevels));}
+        function markQuestionCompleted(lvl,qi){if(!completedLevels[lvl])completedLevels[lvl]=[];if(completedLevels[lvl].indexOf(qi)===-1){completedLevels[lvl].push(qi);saveCompletedLevels();}}
+        function isQuestionCompleted(lvl,qi){return completedLevels[lvl]&&completedLevels[lvl].indexOf(qi)!==-1;}
+        function getCurrentUserPremium(){var u=getUser();return u?checkPremiumByConfig(u.id):false;}
+        function isQuestionLocked(lvl,qi){if(lvl===1)return false;if(isQuestionCompleted(lvl,qi))return false;return !getCurrentUserPremium();}
+        function getActiveLevel(){return isReviewMode?reviewLevel:currentLevel;}
 
-        function generateQ(word,lvl,qi){
-            var vocab=allVocabData[lvl-1].words;
-            var opts=[word.arti];
-            var others=vocab.filter(function(w){return w.jp!==word.jp;}).sort(function(){return Math.random()-0.5;});
-            for(var j=0;j<3;j++)opts.push(others[j].arti);
-            opts.sort(function(){return Math.random()-0.5;});
-            return {japanese:word.jp,romaji:word.romaji,correct:word.arti,options:opts,level:lvl,questionIndex:qi};
-        }
-        function generateQuestions(lvl,pat){ var vocab=allVocabData[lvl-1].words; return PATTERNS[pat].map(function(i){return generateQ(vocab[i],lvl,i);}); }
+        function generateQ(word,lvl,qi){var vocab=allVocabData[lvl-1].words;var opts=[word.arti];var others=vocab.filter(function(w){return w.jp!==word.jp;}).sort(function(){return Math.random()-0.5;});for(var j=0;j<3;j++)opts.push(others[j].arti);opts.sort(function(){return Math.random()-0.5;});return{japanese:word.jp,romaji:word.romaji,correct:word.arti,options:opts,level:lvl,questionIndex:qi};}
+        function generateQuestions(lvl,pat){var vocab=allVocabData[lvl-1].words;return PATTERNS[pat].map(function(i){return generateQ(vocab[i],lvl,i);});}
 
-        function loadPattern(){ mistakes=[]; isMistakeRound=false; mistakeQuestions=[]; patternQuestions=generateQuestions(getActiveLevel(),currentPattern); currentQuestionIndex=0; updateProgress(); loadCurrentQuestion(); }
-        function loadCurrentQuestion(){
-            if(isMistakeRound){ if(mistakeIndex>=mistakeQuestions.length){allPatternsComplete();return;} answered=false; updateQuestionUI(mistakeQuestions[mistakeIndex]); updateProgress(); return; }
-            if(currentQuestionIndex>=10){patternComplete();return;}
-            answered=false; updateQuestionUI(patternQuestions[currentQuestionIndex]); updateProgress();
-            if(!isMistakeRound&&currentQuestionIndex===0&&currentPattern===0)setTimeout(function(){speakWord();},500);
-        }
-        function updateQuestionUI(q){
-            document.getElementById('questionJapanese').textContent=q.japanese;
-            document.getElementById('questionRomaji').textContent=q.romaji;
-            document.getElementById('questionLabel').textContent='Soal '+((isMistakeRound?mistakeIndex:currentQuestionIndex)+1)+' dari 10';
-            var lbs=[document.getElementById('letterA'),document.getElementById('letterB'),document.getElementById('letterC'),document.getElementById('letterD')];
-            var als=[document.getElementById('answerA'),document.getElementById('answerB'),document.getElementById('answerC'),document.getElementById('answerD')];
-            var locked=isQuestionLocked(q.level,q.questionIndex)&&!isReviewMode;
-            for(var i=0;i<4;i++)als[i].textContent=q.options[i];
-            if(locked){ for(var i=0;i<4;i++){lbs[i].innerHTML='<i class="fa-solid fa-lock"></i>';lbs[i].classList.add('locked-icon');} }
-            else{ for(var i=0;i<4;i++){lbs[i].classList.remove('locked-icon');lbs[i].textContent=String.fromCharCode(65+i);} }
-            var slots=document.querySelectorAll('.answer-card');
-            for(var i=0;i<slots.length;i++){slots[i].classList.remove('blurred','pulse');slots[i].style.pointerEvents='auto';}
-        }
-        function updateProgress(){ var t,d; if(isMistakeRound){t=mistakeQuestions.length;d=mistakeIndex;}else{t=30;d=currentPattern*10+currentQuestionIndex;} document.getElementById('progressFill').style.width=(t>0?d/t*100:0)+'%'; }
-        function checkAnswer(idx){
-            if(answered)return;
-            var q=isMistakeRound?mistakeQuestions[mistakeIndex]:patternQuestions[currentQuestionIndex];
-            if(isQuestionLocked(q.level,q.questionIndex)&&!isReviewMode){showPopup();return;}
-            answered=true;
-            if(q.options[idx]===q.correct){
-                if(!isMistakeRound&&!isReviewMode)markQuestionCompleted(q.level,q.questionIndex);
-                if(isMistakeRound)mistakeIndex++;else currentQuestionIndex++;
-                setTimeout(function(){loadCurrentQuestion();},400);
-            }else{
-                if(!isMistakeRound)mistakes.push(q);else mistakeQuestions.push(q);
-                var slots=document.querySelectorAll('.answer-card');
-                for(var i=0;i<slots.length;i++){if(q.options[i]!==q.correct)slots[i].classList.add('blurred');}
-                for(var i=0;i<slots.length;i++){if(q.options[i]===q.correct)slots[i].classList.add('pulse');}
-                setTimeout(function(){if(isMistakeRound)mistakeIndex++;else currentQuestionIndex++;loadCurrentQuestion();},3000);
-            }
-        }
-        function patternComplete(){ currentPattern++; if(currentPattern>=3){ if(mistakes.length>0){isMistakeRound=true;mistakeQuestions=mistakes.slice();mistakeIndex=0;updateProgress();loadCurrentQuestion();}else allPatternsComplete(); }else loadPattern(); }
-        function allPatternsComplete(){
-            if(!isReviewMode){ var ml=parseInt(localStorage.getItem('kotoba_max_level')||'1'); if(currentLevel>=ml&&currentLevel<10){ localStorage.setItem('kotoba_max_level',currentLevel+1); currentLevel=currentLevel+1; document.getElementById('popupLevelDesc').textContent='Kamu lolos ke level selanjutnya!'; document.getElementById('popupLevelOverlay').classList.add('show'); } }
-            currentPattern=0; isMistakeRound=false; mistakes=[]; mistakeQuestions=[];
-            if(isReviewMode){isReviewMode=false;currentLevel=parseInt(localStorage.getItem('kotoba_max_level')||'1');}
-            updateLevelButton(); updateLevelPanel(); updateKamus(); loadPattern();
-        }
-        function repeatLevel(){ document.getElementById('popupLevelOverlay').classList.remove('show'); isReviewMode=true; reviewLevel=currentLevel; currentPattern=0; isMistakeRound=false; mistakes=[]; mistakeQuestions=[]; updateLevelButton(); loadPattern(); }
-        function nextLevel(){ document.getElementById('popupLevelOverlay').classList.remove('show'); isReviewMode=false; currentPattern=0; isMistakeRound=false; mistakes=[]; mistakeQuestions=[]; updateLevelButton(); updateLevelPanel(); updateKamus(); loadPattern(); }
-        function updateLevelButton(){ document.getElementById('btnLv').textContent='Lv.'+getActiveLevel(); }
-        function updateLevelPanel(){
-            var ml=parseInt(localStorage.getItem('kotoba_max_level')||'1'); var ll=document.getElementById('levelList'); var h='';
-            for(var i=1;i<=10;i++){ var st,at,ac; if(i<ml){st='completed';at='Mengulas';ac='review';}else if(i===ml){st='current';at='Lanjutkan';ac='continue';}else{st='locked';at='Menanti';ac='wait';} var lb=i===10?'Max':'Lv.'+i; h+='<div class="level-row"><button class="level-btn '+st+'">'+lb+'</button><div class="level-info"><p class="level-name">'+allVocabData[i-1].category+'</p></div><button class="level-action '+ac+'" onclick="levelAction('+i+',\''+st+'\')">'+at+'</button></div>'; if(i<10)h+='<div class="level-connector"></div>'; }
-            ll.innerHTML=h;
-        }
-        function levelAction(level,status){ closeLevelPanel(); if(status==='review'){isReviewMode=true;reviewLevel=level;}else{currentLevel=level;isReviewMode=false;} currentPattern=0; isMistakeRound=false; mistakes=[]; mistakeQuestions=[]; updateLevelButton(); loadPattern(); }
-        function updateKamus(){
-            var ml=parseInt(localStorage.getItem('kotoba_max_level')||'1'); var ip=getCurrentUserPremium(); var vg=document.getElementById('vocabGrid'); var pb=document.getElementById('premiumUpgradeBtn'); var h='';
-            for(var i=0;i<allVocabData.length;i++){ var cat=allVocabData[i]; h+='<div class="category-divider" style="width:100%;"><div class="category-line"></div><span class="category-text">'+cat.category+'</span><div class="category-line"></div></div>'; for(var j=0;j<cat.words.length;j++){ var w=cat.words[j]; var lk=false; if(!ip){ if(i+1>ml)lk=true; else if(i+1>=2&&!isQuestionCompleted(i+1,j))lk=true; } h+='<div class="vocab-card '+(lk?'locked':'')+'"><p class="vocab-japanese">'+w.jp+'</p><p class="vocab-romaji">'+w.romaji+'</p><div class="vocab-divider"></div><p class="vocab-meaning">'+w.arti+'</p></div>'; } }
-            vg.innerHTML=h; pb.style.display=ip?'none':'flex';
-        }
+        function zoomOutSession(cb){sessionWrapper.classList.remove('zoom-in');sessionWrapper.classList.add('zoom-out');setTimeout(function(){cb();},450);}
+        function zoomInSession(){sessionWrapper.classList.remove('zoom-out');sessionWrapper.classList.add('zoom-in');}
 
-        // ====== SUARA DENGAN FALLBACK ======
-        var audioElement=null;
-        function speakWord(){
-            var text=document.getElementById('questionJapanese').textContent;
-            // Coba SpeechSynthesis dulu
-            if('speechSynthesis' in window){
-                try{
-                    window.speechSynthesis.cancel();
-                    var u=new SpeechSynthesisUtterance(text);
-                    u.lang='ja-JP'; u.rate=0.8; u.pitch=1;
-                    u.onerror=function(){ speakFallback(text); };
-                    window.speechSynthesis.speak(u);
-                    return;
-                }catch(e){}
-            }
-            // Fallback ke Google TTS
-            speakFallback(text);
-        }
+        function loadPattern(){mistakes=[];isMistakeRound=false;mistakeQuestions=[];patternQuestions=generateQuestions(getActiveLevel(),currentPattern);currentQuestionIndex=0;updateProgress();zoomInSession();loadCurrentQuestion();}
+        function loadCurrentQuestion(){if(isMistakeRound){if(mistakeIndex>=mistakeQuestions.length){allPatternsComplete();return;}answered=false;updateQuestionUI(mistakeQuestions[mistakeIndex]);updateProgress();return;}if(currentQuestionIndex>=10){patternComplete();return;}answered=false;updateQuestionUI(patternQuestions[currentQuestionIndex]);updateProgress();}
+        function updateQuestionUI(q){document.getElementById('questionJapanese').textContent=q.japanese;document.getElementById('questionRomaji').textContent=q.romaji;document.getElementById('questionLabel').textContent='Soal '+((isMistakeRound?mistakeIndex:currentQuestionIndex)+1)+' dari 10';var lbs=[document.getElementById('letterA'),document.getElementById('letterB'),document.getElementById('letterC'),document.getElementById('letterD')];var als=[document.getElementById('answerA'),document.getElementById('answerB'),document.getElementById('answerC'),document.getElementById('answerD')];var locked=isQuestionLocked(q.level,q.questionIndex)&&!isReviewMode;for(var i=0;i<4;i++)als[i].textContent=q.options[i];if(locked){for(var i=0;i<4;i++){lbs[i].innerHTML='<i class="fa-solid fa-lock"></i>';lbs[i].classList.add('locked-icon');}}else{for(var i=0;i<4;i++){lbs[i].classList.remove('locked-icon');lbs[i].textContent=String.fromCharCode(65+i);}}var slots=document.querySelectorAll('.answer-card');for(var i=0;i<slots.length;i++){slots[i].classList.remove('blurred','pulse');slots[i].style.pointerEvents='auto';}}
+        function updateProgress(){var t,d;if(isMistakeRound){t=mistakeQuestions.length;d=mistakeIndex;}else{t=30;d=currentPattern*10+currentQuestionIndex;}document.getElementById('progressFill').style.width=(t>0?d/t*100:0)+'%';}
+        function checkAnswer(idx){if(answered)return;var q=isMistakeRound?mistakeQuestions[mistakeIndex]:patternQuestions[currentQuestionIndex];if(isQuestionLocked(q.level,q.questionIndex)&&!isReviewMode){showPopup();return;}answered=true;if(q.options[idx]===q.correct){if(!isMistakeRound&&!isReviewMode)markQuestionCompleted(q.level,q.questionIndex);zoomOutSession(function(){if(isMistakeRound)mistakeIndex++;else currentQuestionIndex++;loadCurrentQuestion();});}else{if(!isMistakeRound)mistakes.push(q);else mistakeQuestions.push(q);var slots=document.querySelectorAll('.answer-card');for(var i=0;i<slots.length;i++){if(q.options[i]!==q.correct)slots[i].classList.add('blurred');}for(var i=0;i<slots.length;i++){if(q.options[i]===q.correct)slots[i].classList.add('pulse');}setTimeout(function(){zoomOutSession(function(){if(isMistakeRound)mistakeIndex++;else currentQuestionIndex++;loadCurrentQuestion();});},3000);}}
+        function patternComplete(){zoomOutSession(function(){currentPattern++;if(currentPattern>=3){if(mistakes.length>0){isMistakeRound=true;mistakeQuestions=mistakes.slice();mistakeIndex=0;updateProgress();zoomInSession();loadCurrentQuestion();}else{zoomInSession();allPatternsComplete();}}else{loadPattern();}});}
+        function allPatternsComplete(){if(!isReviewMode){var ml=parseInt(localStorage.getItem('kotoba_max_level')||'1');if(currentLevel>=ml&&currentLevel<10){localStorage.setItem('kotoba_max_level',currentLevel+1);currentLevel=currentLevel+1;document.getElementById('popupLevelDesc').textContent='Kamu lolos ke level selanjutnya!';document.getElementById('popupLevelOverlay').classList.add('show');}}currentPattern=0;isMistakeRound=false;mistakes=[];mistakeQuestions=[];if(isReviewMode){isReviewMode=false;currentLevel=parseInt(localStorage.getItem('kotoba_max_level')||'1');}updateLevelButton();updateLevelPanel();updateKamus();zoomInSession();loadPattern();}
+        function repeatLevel(){document.getElementById('popupLevelOverlay').classList.remove('show');isReviewMode=true;reviewLevel=currentLevel;currentPattern=0;isMistakeRound=false;mistakes=[];mistakeQuestions=[];updateLevelButton();zoomInSession();loadPattern();}
+        function nextLevel(){document.getElementById('popupLevelOverlay').classList.remove('show');isReviewMode=false;currentPattern=0;isMistakeRound=false;mistakes=[];mistakeQuestions=[];updateLevelButton();updateLevelPanel();updateKamus();zoomInSession();loadPattern();}
+        function updateLevelButton(){document.getElementById('btnLv').textContent='Lv.'+getActiveLevel();}
+        function updateLevelPanel(){var ml=parseInt(localStorage.getItem('kotoba_max_level')||'1');var ll=document.getElementById('levelList');var h='';for(var i=1;i<=10;i++){var st,at,ac;if(i<ml){st='completed';at='Mengulas';ac='review';}else if(i===ml){st='current';at='Lanjutkan';ac='continue';}else{st='locked';at='Menanti';ac='wait';}var lb=i===10?'Max':'Lv.'+i;h+='<div class="level-row"><button class="level-btn '+st+'">'+lb+'</button><div class="level-info"><p class="level-name">'+allVocabData[i-1].category+'</p></div><button class="level-action '+ac+'" onclick="levelAction('+i+',\''+st+'\')">'+at+'</button></div>';if(i<10)h+='<div class="level-connector"></div>';}ll.innerHTML=h;}
+        function levelAction(level,status){closeLevelPanel();if(status==='review'){isReviewMode=true;reviewLevel=level;}else{currentLevel=level;isReviewMode=false;}currentPattern=0;isMistakeRound=false;mistakes=[];mistakeQuestions=[];updateLevelButton();zoomInSession();loadPattern();}
+        function updateKamus(){var ml=parseInt(localStorage.getItem('kotoba_max_level')||'1');var ip=getCurrentUserPremium();var vg=document.getElementById('vocabGrid');var pb=document.getElementById('premiumUpgradeBtn');var h='';for(var i=0;i<allVocabData.length;i++){var cat=allVocabData[i];h+='<div class="category-divider" style="width:100%;"><div class="category-line"></div><span class="category-text">'+cat.category+'</span><div class="category-line"></div></div>';for(var j=0;j<cat.words.length;j++){var w=cat.words[j];var lk=false;if(!ip){if(i+1>ml)lk=true;else if(i+1>=2&&!isQuestionCompleted(i+1,j))lk=true;}h+='<div class="vocab-card '+(lk?'locked':'')+'"><p class="vocab-japanese">'+w.jp+'</p><p class="vocab-romaji">'+w.romaji+'</p><div class="vocab-divider"></div><p class="vocab-meaning">'+w.arti+'</p></div>';}}vg.innerHTML=h;pb.style.display=ip?'none':'flex';}
 
-        function speakFallback(text){
-            if(audioElement){ audioElement.pause(); audioElement=null; }
-            var url='https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q='+encodeURIComponent(text);
-            audioElement=new Audio(url);
-            audioElement.play().catch(function(){
-                audioElement=null;
-            });
-        }
-
-        // ====== SHARE ======
         var copyTimeout=null;
-        function copyShareLink(event){
-            if(event){ event.preventDefault(); }
-            if(document.activeElement){ document.activeElement.blur(); }
-            var urlEl=document.getElementById('shareUrl');
-            var originalUrl='https://appsgeyser.io/19947687/KOTOBA';
-            if(navigator.clipboard && navigator.clipboard.writeText){
-                navigator.clipboard.writeText(originalUrl).then(function(){ showCopiedFeedback(urlEl, originalUrl); }).catch(function(){ fallbackCopy(originalUrl, urlEl); });
-            } else { fallbackCopy(originalUrl, urlEl); }
-            return false;
-        }
-        function fallbackCopy(text, urlEl){
-            var ta=document.createElement('textarea');
-            ta.value=text; ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.top='-9999px'; ta.style.opacity='0'; ta.setAttribute('readonly','readonly');
-            document.body.appendChild(ta); ta.focus(); ta.select();
-            try{ document.execCommand('copy'); showCopiedFeedback(urlEl, text); }
-            catch(e){ urlEl.textContent='Gagal menyalin'; urlEl.classList.add('copied'); if(copyTimeout)clearTimeout(copyTimeout); copyTimeout=setTimeout(function(){ urlEl.textContent=text; urlEl.classList.remove('copied'); },2000); }
-            document.body.removeChild(ta);
-            if(document.activeElement){ document.activeElement.blur(); }
-        }
-        function showCopiedFeedback(urlEl, originalUrl){
-            urlEl.textContent='Tautan sudah tersalin'; urlEl.classList.add('copied');
-            if(copyTimeout)clearTimeout(copyTimeout);
-            copyTimeout=setTimeout(function(){ urlEl.textContent=originalUrl; urlEl.classList.remove('copied'); },2000);
-        }
+        function copyShareLink(event){if(event){event.preventDefault();}if(document.activeElement){document.activeElement.blur();}var urlEl=document.getElementById('shareUrl');var originalUrl='https://appsgeyser.io/19947687/KOTOBA';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(originalUrl).then(function(){showCopiedFeedback(urlEl,originalUrl);}).catch(function(){fallbackCopy(originalUrl,urlEl);});}else{fallbackCopy(originalUrl,urlEl);}return false;}
+        function fallbackCopy(text,urlEl){var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';ta.style.top='-9999px';ta.style.opacity='0';ta.setAttribute('readonly','readonly');document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');showCopiedFeedback(urlEl,text);}catch(e){urlEl.textContent='Gagal menyalin';urlEl.classList.add('copied');if(copyTimeout)clearTimeout(copyTimeout);copyTimeout=setTimeout(function(){urlEl.textContent=text;urlEl.classList.remove('copied');},2000);}document.body.removeChild(ta);if(document.activeElement){document.activeElement.blur();}}
+        function showCopiedFeedback(urlEl,originalUrl){urlEl.textContent='Tautan sudah tersalin';urlEl.classList.add('copied');if(copyTimeout)clearTimeout(copyTimeout);copyTimeout=setTimeout(function(){urlEl.textContent=originalUrl;urlEl.classList.remove('copied');},2000);}
 
         var mainContainer=document.getElementById('mainContainer');
         function simpleHash(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h=h&h;}return Math.abs(h);}
@@ -477,44 +329,10 @@
         function saveUser(name,id){localStorage.setItem('kotoba_user',JSON.stringify({name:name,id:id,registeredAt:new Date().toISOString()}));}
         function getUser(){var d=localStorage.getItem('kotoba_user');return d?JSON.parse(d):null;}
 
-        function updatePremiumUI(isPremium){
-            var display=document.getElementById('userNameDisplay');
-            var existing=display.querySelector('.premium-crown-icon');
-            if(isPremium){if(!existing){var span=document.createElement('span');span.className='premium-crown-icon';span.innerHTML='<i class="fa-solid fa-crown"></i>';display.appendChild(span);}}
-            else{if(existing)existing.remove();}
-        }
+        function updatePremiumUI(isPremium){var display=document.getElementById('userNameDisplay');var existing=display.querySelector('.premium-crown-icon');if(isPremium){if(!existing){var span=document.createElement('span');span.className='premium-crown-icon';span.innerHTML='<i class="fa-solid fa-crown"></i>';display.appendChild(span);}}else{if(existing)existing.remove();}}
 
-        function registerUser(){
-            var ni=document.getElementById('nameInput');var nm=ni.value.trim();
-            if(!nm){document.getElementById('registerError').style.display='block';return;}
-            document.getElementById('registerError').style.display='none';
-            var id=generateFullID();saveUser(nm,id);
-            document.getElementById('userNameDisplay').textContent=nm;
-            document.getElementById('userIdDisplay').textContent='ID: '+id;
-            document.getElementById('registerContainer').classList.add('hidden');
-            mainContainer.classList.remove('hidden-behind');
-            if(!localStorage.getItem('kotoba_max_level'))localStorage.setItem('kotoba_max_level','1');
-            currentLevel=parseInt(localStorage.getItem('kotoba_max_level')||'1');
-            loadCompletedLevels();
-            updatePremiumUI(checkPremiumByConfig(id));
-            updateLevelButton();updateLevelPanel();updateKamus();loadPattern();
-            setTimeout(function(){document.getElementById('sessionWrapper').classList.add('zoom-in');},100);
-        }
-        function checkRegistration(){
-            var u=getUser();
-            if(u){
-                document.getElementById('userNameDisplay').textContent=u.name;
-                document.getElementById('userIdDisplay').textContent='ID: '+u.id;
-                document.getElementById('registerContainer').classList.add('hidden');
-                mainContainer.classList.remove('hidden-behind');
-                if(!localStorage.getItem('kotoba_max_level'))localStorage.setItem('kotoba_max_level','1');
-                currentLevel=parseInt(localStorage.getItem('kotoba_max_level')||'1');
-                loadCompletedLevels();
-                updatePremiumUI(checkPremiumByConfig(u.id));
-                updateLevelButton();updateLevelPanel();updateKamus();loadPattern();
-                setTimeout(function(){document.getElementById('sessionWrapper').classList.add('zoom-in');},100);
-            }else{mainContainer.classList.add('hidden-behind');}
-        }
+        function registerUser(){var ni=document.getElementById('nameInput');var nm=ni.value.trim();if(!nm){document.getElementById('registerError').style.display='block';return;}document.getElementById('registerError').style.display='none';var id=generateFullID();saveUser(nm,id);document.getElementById('userNameDisplay').textContent=nm;document.getElementById('userIdDisplay').textContent='ID: '+id;document.getElementById('registerContainer').classList.add('hidden');mainContainer.classList.remove('hidden-behind');if(!localStorage.getItem('kotoba_max_level'))localStorage.setItem('kotoba_max_level','1');currentLevel=parseInt(localStorage.getItem('kotoba_max_level')||'1');loadCompletedLevels();updatePremiumUI(checkPremiumByConfig(id));updateLevelButton();updateLevelPanel();updateKamus();loadPattern();hideSplashAfterMin();}
+        function checkRegistration(){var u=getUser();if(u){document.getElementById('userNameDisplay').textContent=u.name;document.getElementById('userIdDisplay').textContent='ID: '+u.id;document.getElementById('registerContainer').classList.add('hidden');mainContainer.classList.remove('hidden-behind');if(!localStorage.getItem('kotoba_max_level'))localStorage.setItem('kotoba_max_level','1');currentLevel=parseInt(localStorage.getItem('kotoba_max_level')||'1');loadCompletedLevels();updatePremiumUI(checkPremiumByConfig(u.id));updateLevelButton();updateLevelPanel();updateKamus();loadPattern();hideSplashAfterMin();}else{mainContainer.classList.add('hidden-behind');hideSplashAfterMin();}}
         function showPopup(){document.getElementById('popupOverlay').classList.add('show');}
         function closePopup(){document.getElementById('popupOverlay').classList.remove('show');}
         function goToWhatsApp(){var u=getUser();var nm=u?u.name:'Pengguna';var id=u?u.id:'Belum terdaftar';var msg='Halo, Ka saya...\n\nNama: '+nm+'\nID: '+id+'\n\nSaya dari Apk/Web KOTOBA yang Kaka buat, dan saya ingin akses fitur premium. Mohon untuk di izinkan.\n\nTerimakasih';window.open('https://wa.me/628567858301?text='+encodeURIComponent(msg),'_blank');}
